@@ -1,0 +1,841 @@
+{% extends "base.html" %}
+
+{% block title %}AI Tutor Chat{% endblock %}
+
+{% block content %}
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 bg-dark text-white p-0 d-none d-md-block">
+            <div class="sidebar h-100 d-flex flex-column">
+                <div class="p-3 border-bottom border-secondary">
+                    <h6 class="mb-0"><i class="fas fa-plus me-2"></i>New Chat</h6>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="p-3 border-bottom border-secondary">
+                    <h6 class="small text-muted mb-2">QUICK ACTIONS</h6>
+                    <div class="d-grid gap-1">
+                        <button class="btn btn-outline-light btn-sm text-start quick-action-btn" 
+                                data-action="explanation">
+                            <i class="fas fa-lightbulb me-2"></i>Explain Topic
+                        </button>
+                        <button class="btn btn-outline-light btn-sm text-start quick-action-btn" 
+                                data-action="practice">
+                            <i class="fas fa-dumbbell me-2"></i>Practice Problems
+                        </button>
+                        <button class="btn btn-outline-light btn-sm text-start quick-action-btn" 
+                                data-action="quiz">
+                            <i class="fas fa-question-circle me-2"></i>Create Quiz
+                        </button>
+                        <button class="btn btn-outline-light btn-sm text-start quick-action-btn" 
+                                data-action="study_notes">
+                            <i class="fas fa-sticky-note me-2"></i>Study Notes
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Recent Conversations -->
+                <div class="flex-grow-1 overflow-auto">
+                    <div class="p-3">
+                        <h6 class="small text-muted mb-2">RECENT CHATS</h6>
+                        <div id="recentConversations">
+                            {% if conversations %}
+                                {% for conv in conversations[:10] %}
+                                <div class="conversation-item p-2 rounded mb-1" 
+                                     data-question="{{ conv.question|e }}"
+                                     data-response="{{ conv.response|e }}">
+                                    <div class="small">{{ conv.question[:40] }}{% if conv.question|length > 40 %}...{% endif %}</div>
+                                    <div class="text-muted" style="font-size: 0.7rem;">
+                                        {{ conv.created_at.strftime('%m/%d %H:%M') }}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-muted small">No conversations yet</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- View All History -->
+                <div class="p-3 border-top border-secondary">
+                    <a href="{{ url_for('history') }}" class="btn btn-outline-light btn-sm w-100">
+                        <i class="fas fa-history me-2"></i>View All History
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Chat Area -->
+        <div class="col-md-9 col-lg-10 p-0">
+            <div class="chat-container h-100 d-flex flex-column">
+                <!-- Chat Header -->
+                <div class="chat-header bg-white border-bottom p-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary rounded-circle p-2 me-3">
+                            <i class="fas fa-robot text-white"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0">AI Tutor</h5>
+                            <small class="text-muted">Your personal learning assistant</small>
+                        </div>
+                        <div class="ms-auto d-flex gap-2">
+                            <button class="btn btn-outline-secondary btn-sm d-md-none" id="sidebarToggle">
+                                <i class="fas fa-bars"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" id="clearChatBtn">
+                                <i class="fas fa-trash me-1"></i>Clear Chat
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chat Messages -->
+                <div class="chat-messages flex-grow-1 overflow-auto p-3" id="chatMessages">
+                    <div class="welcome-message text-center py-5">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-robot text-primary fs-1"></i>
+                        </div>
+                        <h4>Welcome to AI Tutor!</h4>
+                        <p class="text-muted">I'm here to help you learn. Ask me anything about:</p>
+                        <div class="row g-2 mt-3 justify-content-center">
+                            <div class="col-6 col-md-3">
+                                <div class="bg-light rounded p-2 small text-center">
+                                    <i class="fas fa-calculator text-primary me-1"></i>Mathematics
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="bg-light rounded p-2 small text-center">
+                                    <i class="fas fa-flask text-success me-1"></i>Science
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="bg-light rounded p-2 small text-center">
+                                    <i class="fas fa-book text-warning me-1"></i>Literature
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="bg-light rounded p-2 small text-center">
+                                    <i class="fas fa-laptop-code text-info me-1"></i>Programming
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chat Input -->
+                <div class="chat-input bg-white border-top p-3">
+                    <form id="chatForm" class="d-flex flex-column gap-2">
+                        <div class="d-flex gap-2">
+                            <div class="flex-grow-1">
+                                <div class="input-group">
+                                    <select id="subjectSelect" class="form-select" style="max-width: 120px;" aria-label="Select subject">
+                                        <option value="">Subject</option>
+                                        <option value="Mathematics">Math</option>
+                                        <option value="Physics">Physics</option>
+                                        <option value="Chemistry">Chemistry</option>
+                                        <option value="Biology">Biology</option>
+                                        <option value="English">English</option>
+                                        <option value="History">History</option>
+                                        <option value="Programming">Programming</option>
+                                        <option value="Science">Science</option>
+                                    </select>
+                                    <textarea id="questionInput" class="form-control" 
+                                           placeholder="Ask me anything..." 
+                                           required 
+                                           rows="1"
+                                           style="resize: none; overflow-y: hidden;"></textarea>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="sendBtn" disabled>
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 small text-muted">
+                            <span id="conversationTypeIndicator"></span>
+                            <span class="ms-auto">Press Enter to send, Shift+Enter for new line</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Sidebar Overlay -->
+<div class="offcanvas offcanvas-start text-white" tabindex="-1" id="mobileSidebar" style="background-color: #343a40;">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">AI Tutor</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+        <!-- Mobile version of sidebar content -->
+        <div class="p-3 border-bottom border-secondary">
+            <h6 class="small text-muted mb-2">QUICK ACTIONS</h6>
+            <div class="d-grid gap-1">
+                <button class="btn btn-outline-light btn-sm text-start quick-action-btn" 
+                        data-action="explanation">
+                    <i class="fas fa-lightbulb me-2"></i>Explain Topic
+                </button>
+                <button class="btn btn-outline-light btn-sm text-start quick-action-btn" 
+                        data-action="practice">
+                    <i class="fas fa-dumbbell me-2"></i>Practice Problems
+                </button>
+                <button class="btn btn-outline-light btn-sm text-start quick-action-btn" 
+                        data-action="quiz">
+                    <i class="fas fa-question-circle me-2"></i>Create Quiz
+                </button>
+                <button class="btn btn-outline-light btn-sm text-start quick-action-btn" 
+                        data-action="study_notes">
+                    <i class="fas fa-sticky-note me-2"></i>Study Notes
+                </button>
+            </div>
+        </div>
+        
+        <div class="p-3">
+            <a href="{{ url_for('history') }}" class="btn btn-outline-light btn-sm w-100">
+                <i class="fas fa-history me-2"></i>View All History
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="loadingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mb-0">AI is thinking...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Error Toast -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-danger text-white">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong class="me-auto">Error</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="errorToastBody">
+            An error occurred. Please try again.
+        </div>
+    </div>
+</div>
+
+<style>
+.sidebar {
+    height: calc(100vh - 76px);
+}
+
+.chat-container {
+    height: calc(100vh - 76px);
+}
+
+.chat-messages {
+    background-color: #f8f9fa;
+    scroll-behavior: smooth;
+}
+
+.conversation-item {
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.conversation-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateX(2px);
+}
+
+.message-bubble {
+    margin-bottom: 1rem;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.user-message {
+    text-align: right;
+}
+
+.user-message .message-content {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border-radius: 18px 18px 4px 18px;
+    padding: 12px 16px;
+    display: inline-block;
+    max-width: 80%;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.ai-message .message-content {
+    background-color: white;
+    color: #333;
+    border-radius: 18px 18px 18px 4px;
+    padding: 12px 16px;
+    display: inline-block;
+    max-width: 80%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+.message-time {
+    font-size: 0.75rem;
+    color: #6c757d;
+    margin-top: 4px;
+}
+
+.error-message .message-content {
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+.quick-action-btn.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: white;
+}
+
+.conversation-type-indicator {
+    font-size: 0.75rem;
+    color: #007bff;
+    font-weight: 500;
+}
+
+#questionInput {
+    min-height: 38px;
+    max-height: 120px;
+    transition: height 0.2s ease;
+}
+
+.chat-input {
+    background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+    border-top: 2px solid #e9ecef;
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes typing {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0.5; }
+}
+
+.typing-indicator {
+    animation: typing 1.5s infinite;
+}
+
+@media (max-width: 768px) {
+    .chat-container {
+        height: calc(100vh - 56px);
+    }
+    
+    .user-message .message-content,
+    .ai-message .message-content {
+        max-width: 95%;
+    }
+}
+
+/* Enhanced scrollbar */
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+</style>
+
+<script>
+class ChatInterface {
+    constructor() {
+        this.currentConversationType = 'general';
+        this.isLoading = false;
+        this.loadingModal = null;
+        this.errorToast = null;
+        
+        this.initializeEventListeners();
+        this.initializeModals();
+        this.handleURLParams();
+    }
+    
+    initializeEventListeners() {
+        // Chat form submission
+        document.getElementById('chatForm').addEventListener('submit', (e) => this.handleSubmit(e));
+        
+        // Quick action buttons
+        document.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => this.handleQuickAction(e));
+        });
+        
+        // Conversation items
+        document.querySelectorAll('.conversation-item').forEach(item => {
+            item.addEventListener('click', (e) => this.handleConversationClick(e));
+        });
+        
+        // Clear chat button
+        document.getElementById('clearChatBtn').addEventListener('click', () => this.clearChat());
+        
+        // Sidebar toggle for mobile
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', () => this.toggleMobileSidebar());
+        }
+        
+        // Input handling
+        const questionInput = document.getElementById('questionInput');
+        questionInput.addEventListener('input', (e) => this.handleInputChange(e));
+        questionInput.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        
+        // Form validation
+        questionInput.addEventListener('input', () => this.validateForm());
+    }
+    
+    initializeModals() {
+        this.loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+        this.errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
+    }
+    
+    handleURLParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const prefillQuestion = urlParams.get('question');
+        const prefillSubject = urlParams.get('subject');
+        const prefillType = urlParams.get('type');
+        
+        if (prefillType) {
+            this.currentConversationType = prefillType;
+            const questionInput = document.getElementById('questionInput');
+            const placeholders = {
+                explanation: 'What topic would you like me to explain?',
+                practice: 'What topic do you want practice problems for?',
+                quiz: 'What topic should I create a quiz about?',
+                study_notes: 'What topic do you need study notes for?'
+            };
+            questionInput.placeholder = placeholders[prefillType] || 'Ask me anything...';
+            // Highlight the correct quick action button
+            document.querySelectorAll('.quick-action-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.action === prefillType);
+            });
+            this.updateConversationTypeIndicator(prefillType);
+        }
+        
+        if (prefillQuestion) {
+            document.getElementById('questionInput').value = prefillQuestion;
+            if (prefillSubject) {
+                document.getElementById('subjectSelect').value = prefillSubject;
+            }
+            document.getElementById('questionInput').focus();
+            this.validateForm();
+        }
+    }
+    
+    async handleSubmit(e) {
+        e.preventDefault();
+        
+        if (this.isLoading) return;
+        
+        const questionInput = document.getElementById('questionInput');
+        const subjectSelect = document.getElementById('subjectSelect');
+        const question = questionInput.value.trim();
+        const subject = subjectSelect.value;
+        
+        if (!question) {
+            this.showError('Please enter a question.');
+            return;
+        }
+        
+        try {
+            this.isLoading = true;
+            this.validateForm(); // <-- Add this line to immediately disable the send button
+            
+            // Add user message to chat
+            this.addMessage(question, 'user', subject);
+            
+            // Clear input
+            questionInput.value = '';
+            this.autoResize(questionInput);
+            
+            // Show loading
+            this.showLoading();
+            
+            const response = await fetch('/ai-chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    question: question,
+                    subject: subject,
+                    type: this.currentConversationType
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Add AI response to chat
+            this.addMessage(data.response, 'ai');
+            
+        } catch (error) {
+            this.addMessage('Sorry, I encountered an error. Please try again.', 'ai', '', true);
+            this.showError(error.message);
+            console.error('Error:', error);
+        } finally {
+            this.isLoading = false; // <-- Move this before validateForm
+            this.hideLoading();
+            this.resetConversationType();
+            this.validateForm(); // <-- This will now enable the send button
+        }
+    }
+    
+    addMessage(content, sender, subject = '', isError = false) {
+        const chatMessages = document.getElementById('chatMessages');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message-bubble ${sender}-message ${isError ? 'error-message' : ''}`;
+        
+        const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        const escapedContent = this.escapeHtml(content);
+        
+        if (sender === 'user') {
+            messageDiv.innerHTML = `
+                <div class="message-content">
+                    ${subject ? `<div class="badge bg-light text-dark mb-1">${this.escapeHtml(subject)}</div><br>` : ''}
+                    ${escapedContent}
+                </div>
+                <div class="message-time">${time}</div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="d-flex align-items-start">
+                    <div class="bg-primary rounded-circle p-2 me-2 mt-1 flex-shrink-0" style="width: 32px; height: 32px;">
+                        <i class="fas fa-robot text-white small"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="message-content ${isError ? 'error-message' : ''}">
+                            ${this.formatAIResponse(escapedContent)}
+                        </div>
+                        <div class="message-time">${time}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        chatMessages.appendChild(messageDiv);
+        this.scrollToBottom();
+        
+        // Remove welcome message if it exists
+        const welcomeMsg = chatMessages.querySelector('.welcome-message');
+        if (welcomeMsg) {
+            welcomeMsg.remove();
+        }
+    }
+    
+    formatAIResponse(content) {
+        return content
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/```(.*?)```/gs, '<pre class="bg-light p-2 rounded"><code>$1</code></pre>')
+            .replace(/`(.*?)`/g, '<code class="bg-light px-1 rounded">$1</code>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>')
+            .replace(/^(.+)/, '<p>$1')
+            .replace(/(.+)$/, '$1</p>');
+    }
+    
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    handleQuickAction(e) {
+        const action = e.currentTarget.dataset.action;
+        this.currentConversationType = action;
+        
+        const questionInput = document.getElementById('questionInput');
+        const placeholders = {
+            explanation: 'What topic would you like me to explain?',
+            practice: 'What topic do you want practice problems for?',
+            quiz: 'What topic should I create a quiz about?',
+            study_notes: 'What topic do you need study notes for?'
+        };
+        
+        questionInput.placeholder = placeholders[action] || 'Ask me anything...';
+        questionInput.focus();
+        
+        // Update visual indicators
+        document.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        e.currentTarget.classList.add('active');
+        
+        this.updateConversationTypeIndicator(action);
+        
+        // Close mobile sidebar if open
+        const mobileSidebar = bootstrap.Offcanvas.getInstance(document.getElementById('mobileSidebar'));
+        if (mobileSidebar) {
+            mobileSidebar.hide();
+        }
+    }
+    
+    updateConversationTypeIndicator(type) {
+        const indicator = document.getElementById('conversationTypeIndicator');
+        const typeLabels = {
+            explanation: '💡 Explanation mode',
+            practice: '🏋️ Practice mode',
+            quiz: '❓ Quiz mode',
+            study_notes: '📝 Study notes mode'
+        };
+        
+        indicator.textContent = typeLabels[type] || '';
+        indicator.className = type ? 'conversation-type-indicator' : '';
+    }
+    
+    resetConversationType() {
+        this.currentConversationType = 'general';
+        document.getElementById('questionInput').placeholder = 'Ask me anything...';
+        document.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        this.updateConversationTypeIndicator('');
+    }
+    
+    handleConversationClick(e) {
+        const item = e.currentTarget;
+        const question = item.dataset.question;
+        const response = item.dataset.response;
+        
+        if (question && response) {
+            this.loadConversation(question, response);
+        }
+    }
+    
+    loadConversation(question, response) {
+        this.clearChat();
+        this.addMessage(question, 'user');
+        
+        setTimeout(() => {
+            this.addMessage(response, 'ai');
+        }, 500);
+    }
+    
+    clearChat() {
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.innerHTML = `
+            <div class="welcome-message text-center py-5">
+                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-robot text-primary fs-1"></i>
+                </div>
+                <h4>Welcome to AI Tutor!</h4>
+                <p class="text-muted">I'm here to help you learn. Ask me anything!</p>
+            </div>
+        `;
+        this.resetConversationType();
+    }
+    
+    handleInputChange(e) {
+        this.autoResize(e.target);
+    }
+    
+    handleKeyDown(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+        }
+    }
+    
+    autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    }
+    
+    validateForm() {
+        const questionInput = document.getElementById('questionInput');
+        const sendBtn = document.getElementById('sendBtn');
+        sendBtn.disabled = !questionInput.value.trim() || this.isLoading;
+    }
+    
+    toggleMobileSidebar() {
+        const sidebar = new bootstrap.Offcanvas(document.getElementById('mobileSidebar'));
+        sidebar.show();
+    }
+    
+    showLoading() {
+        if (this.loadingModal) {
+            this.loadingModal.show();
+        }
+    }
+    
+    hideLoading() {
+        if (this.loadingModal) {
+            this.loadingModal.hide();
+        }
+    }
+    
+    showError(message) {
+        document.getElementById('errorToastBody').textContent = message;
+        if (this.errorToast) {
+            this.errorToast.show();
+        }
+    }
+    
+    scrollToBottom() {
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+}
+
+// Initialize the chat interface when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new ChatInterface();
+});
+
+// --- QUIZ MODE LOGIC ---
+function parseQuizResponse(response) {
+    // Parse the AI's quiz output into an array of {question, options, answer, explanation}
+    const quiz = [];
+    const regex = /Q\d+:\s*(.*?)\nA\)\s*(.*?)\nB\)\s*(.*?)\nC\)\s*(.*?)\nD\)\s*(.*?)\nCorrect Answer:\s*([A-D])\nExplanation:\s*(.*?)(?=\nQ\d+:|$)/gs;
+    let match;
+    while ((match = regex.exec(response)) !== null) {
+        quiz.push({
+            question: match[1].trim(),
+            options: [
+                { label: "A", text: match[2].trim() },
+                { label: "B", text: match[3].trim() },
+                { label: "C", text: match[4].trim() },
+                { label: "D", text: match[5].trim() }
+            ],
+            answer: match[6].trim(),
+            explanation: match[7].trim()
+        });
+    }
+    return quiz;
+}
+
+function showQuiz(quizData) {
+    let current = 0;
+    let score = 0;
+    let timer = null;
+    let timeLeft = 30;
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.innerHTML = '';
+    showQuestion();
+
+    function showQuestion() {
+        if (current >= quizData.length) {
+            showSummary();
+            return;
+        }
+        timeLeft = 30;
+        chatMessages.innerHTML = `
+            <div class="quiz-question mb-4">
+                <div class="fw-bold mb-2">Question ${current + 1} of ${quizData.length}</div>
+                <div class="mb-3">${quizData[current].question}</div>
+                <div id="quizOptions" class="d-grid gap-2 mb-3"></div>
+                <div class="text-muted small mb-2"><span id="quizTimer">30</span> seconds left</div>
+                <div id="quizFeedback"></div>
+            </div>
+        `;
+        const optionsDiv = document.getElementById('quizOptions');
+        quizData[current].options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-outline-primary';
+            btn.textContent = `${opt.label}) ${opt.text}`;
+            btn.onclick = () => selectOption(opt.label);
+            optionsDiv.appendChild(btn);
+        });
+        timer = setInterval(() => {
+            timeLeft--;
+            document.getElementById('quizTimer').textContent = timeLeft;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                showFeedback(null);
+            }
+        }, 1000);
+    }
+
+    function selectOption(selected) {
+        clearInterval(timer);
+        showFeedback(selected);
+    }
+
+    function showFeedback(selected) {
+        const correct = quizData[current].answer;
+        const feedbackDiv = document.getElementById('quizFeedback');
+        let html = '';
+        if (selected) {
+            if (selected === correct) {
+                html = `<div class="alert alert-success mb-2">Correct!</div>`;
+                score++;
+            } else {
+                html = `<div class="alert alert-danger mb-2">Wrong! Correct answer: <strong>${correct}</strong></div>`;
+            }
+        } else {
+            html = `<div class="alert alert-warning mb-2">Time's up! Correct answer: <strong>${correct}</strong></div>`;
+        }
+        html += `<div class="mb-2"><strong>Explanation:</strong> ${quizData[current].explanation}</div>`;
+        html += `<button class="btn btn-primary mt-2" id="nextQuizBtn">Next</button>`;
+        feedbackDiv.innerHTML = html;
+        document.querySelectorAll('#quizOptions button').forEach(btn => btn.disabled = true);
+        document.getElementById('nextQuizBtn').onclick = () => {
+            current++;
+            showQuestion();
+        };
+    }
+
+    function showSummary() {
+        chatMessages.innerHTML = `
+            <div class="quiz-summary text-center py-5">
+                <h3 class="mb-3">Quiz Complete!</h3>
+                <div class="mb-2">Your Score: <strong>${score} / ${quizData.length}</strong></div>
+                <button class="btn btn-primary mt-3" onclick="location.reload()">Start New Chat</button>
+            </div>
+        `;
+    }
+}
+
+// Patch ChatInterface to support quiz mode
+const origAddMessage = ChatInterface.prototype.addMessage;
+ChatInterface.prototype.addMessage = function(content, sender, subject = '', isError = false) {
+    if (this.currentConversationType === 'quiz' && sender === 'ai') {
+        // Parse and show quiz interactively
+        const quizData = parseQuizResponse(content);
+        if (quizData.length > 0) {
+            showQuiz(quizData);
+            return;
+        }
+    }
+    origAddMessage.call(this, content, sender, subject, isError);
+};
+</script>
+{% endblock %}

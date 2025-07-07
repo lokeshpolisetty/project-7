@@ -1,0 +1,17 @@
+{% extends "chat.html" %}
+{% block title %}AI Tutor - Interactive Quiz{% endblock %}
+{% block content %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Force quiz mode on load
+    if (window.ChatInterface) {
+        ChatInterface.prototype.currentConversationType = 'quiz';
+        document.getElementById('questionInput').placeholder = 'What topic should I create a quiz about?';
+        document.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.action === 'quiz');
+        });
+    }
+});
+</script>
+{% endblock %}

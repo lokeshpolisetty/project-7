@@ -1,0 +1,17 @@
+{% extends "chat.html" %}
+{% block title %}AI Tutor - Practice Problems{% endblock %}
+{% block content %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Force practice mode on load
+    if (window.ChatInterface) {
+        ChatInterface.prototype.currentConversationType = 'practice';
+        document.getElementById('questionInput').placeholder = 'What topic do you want practice problems for?';
+        document.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.action === 'practice');
+        });
+    }
+});
+</script>
+{% endblock %}

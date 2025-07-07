@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - AI Tutor{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-white border-bottom">
+                    <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i>Edit Profile</h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-4 text-center">
+                            <img id="avatarPreview" src="{{ user.avatar or url_for('static', filename='img/default-avatar.png') }}" 
+                                 alt="Profile Photo" class="rounded-circle mb-2" style="width: 100px; height: 100px; object-fit: cover;">
+                            <div>
+                                <label for="avatar_file" class="form-label mt-2">Change Profile Photo</label>
+                                <input type="file" class="form-control" id="avatar_file" name="avatar_file" accept="image/*">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ user.name }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="avatar" class="form-label">Avatar URL</label>
+                            <input type="url" class="form-control" id="avatar" name="avatar" value="{{ user.avatar or '' }}">
+                            <div class="form-text">Optional. Paste a link to your profile picture or upload above.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="password" name="password" minlength="6" autocomplete="new-password">
+                            <div class="form-text">Leave blank to keep your current password.</div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Save Changes
+                            </button>
+                            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+document.getElementById('avatar_file').addEventListener('change', function(event) {
+    const [file] = event.target.files;
+    if (file) {
+        document.getElementById('avatarPreview').src = URL.createObjectURL(file);
+    }
+});
+</script>
+{% endblock %}

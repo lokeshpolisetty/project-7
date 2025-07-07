@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block title %}Chat History - AI Tutor{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6 fw-bold">Chat History</h1>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('chat') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>New Chat
+            </a>
+            {% if conversations %}
+            <form method="POST" action="{{ url_for('delete_history') }}" onsubmit="return confirm('Are you sure you want to delete all chat history? This cannot be undone.');">
+                <button type="submit" class="btn btn-outline-danger">
+                    <i class="fas fa-trash me-1"></i>Delete All History
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if conversations %}
+        <div class="row g-4">
+            {% for conv in conversations %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ conv.question[:100] }}{% if conv.question|length > 100 %}...{% endif %}</h6>
+                                <div class="d-flex gap-2 mb-2">
+                                    {% if conv.subject %}
+                                    <span class="badge bg-primary">{{ conv.subject }}</span>
+                                    {% endif %}
+                                    {% if conv.conversation_type %}
+                                    <span class="badge bg-secondary">{{ conv.conversation_type }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <small class="text-muted">{{ conv.created_at.strftime('%B %d, %Y at %I:%M %p') }}</small>
+                        </div>
+                        
+                        <div class="bg-light rounded p-3">
+                            <div class="d-flex align-items-start">
+                                <div class="bg-primary rounded-circle p-2 me-3" style="width: 32px; height: 32px;">
+                                    <i class="fas fa-robot text-white small"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <p class="mb-0">{{ conv.response[:200] }}{% if conv.response|length > 200 %}...{% endif %}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3 d-flex gap-2">
+                            <button class="btn btn-outline-primary btn-sm view-conversation-btn"
+                                    data-question="{{ conv.question|e }}"
+                                    data-response="{{ conv.response|e }}">
+                                <i class="fas fa-eye me-1"></i>View Full
+                            </button>
+                            <a class="btn btn-primary btn-sm"
+                               href="{{ url_for('chat', question=conv.question, subject=conv.subject) }}">
+                                <i class="fas fa-arrow-right me-1"></i>Continue
+                            </a>
+                            <form method="POST" action="{{ url_for('delete_conversation', conv_id=conv.id) }}" class="d-inline"
+                                  onsubmit="return confirm('Delete this conversation? This cannot be undone.');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if total > per_page %}
+        <nav class="mt-5" aria-label="Chat history pagination">
+            <ul class="pagination justify-content-center">
+                {% set total_pages = ((total - 1) // per_page) + 1 %}
+                
+                {% if page > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('history', page=page-1) }}" aria-label="Previous page">
+                        <i class="fas fa-chevron-left me-1"></i>Previous
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == 1 or p == total_pages or (p >= page - 2 and p <= page + 2) %}
+                    <li class="page-item {{ 'active' if p == page }}">
+                        <a class="page-link" href="{{ url_for('history', page=p) }}">{{ p }}</a>
+                    </li>
+                    {% elif p == page - 3 or p == page + 3 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page < total_pages %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('history', page=page+1) }}" aria-label="Next page">
+                        Next<i class="fas fa-chevron-right ms-1"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+    {% else %}
+        <div class="text-center py-5">
+            <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 100px; height: 100px;">
+                <i class="fas fa-history text-muted fs-1"></i>
+            </div>
+            <h4>No chat history yet</h4>
+            <p class="text-muted">Start a conversation with the AI tutor to see your history here.</p>
+            <a href="{{ url_for('chat') }}" class="btn btn-primary">
+                <i class="fas fa-comments me-2"></i>Start First Chat
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Full Conversation Modal -->
+<div class="modal fade" id="conversationModal" tabindex="-1" aria-labelledby="conversationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="conversationModalLabel">Full Conversation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="modalConversationContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners to all view conversation buttons
+    const viewButtons = document.querySelectorAll('.view-conversation-btn');
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const question = this.getAttribute('data-question');
+            const response = this.getAttribute('data-response');
+            loadFullConversation(question, response);
+        });
+    });
+    
+    // Prefill chat input if question is present in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const prefillQuestion = urlParams.get('question');
+    const prefillSubject = urlParams.get('subject');
+    if (prefillQuestion && document.getElementById('questionInput')) {
+        document.getElementById('questionInput').value = prefillQuestion;
+        if (prefillSubject && document.getElementById('subjectSelect')) {
+            document.getElementById('subjectSelect').value = prefillSubject;
+        }
+        document.getElementById('questionInput').focus();
+    }
+});
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatResponse(text) {
+    // Convert newlines to <br> tags and handle basic formatting
+    return text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+}
+
+function loadFullConversation(question, response) {
+    if (!question || !response) {
+        console.error('Missing question or response data');
+        return;
+    }
+    
+    const modalContent = document.getElementById('modalConversationContent');
+    if (!modalContent) {
+        console.error('Modal content element not found');
+        return;
+    }
+    
+    // Clear previous content
+    modalContent.innerHTML = '';
+    
+    // Create conversation HTML
+    const conversationHTML = `
+        <div class="conversation-container">
+            <!-- User Message -->
+            <div class="d-flex justify-content-end mb-3">
+                <div class="bg-primary text-white rounded-3 p-3 position-relative" style="max-width: 80%;">
+                    <div class="fw-bold small mb-1">You</div>
+                    <div>${escapeHtml(question)}</div>
+                </div>
+            </div>
+            
+            <!-- AI Response -->
+            <div class="d-flex align-items-start mb-3">
+                <div class="bg-primary rounded-circle p-2 me-3 flex-shrink-0" style="width: 40px; height: 40px;">
+                    <i class="fas fa-robot text-white"></i>
+                </div>
+                <div class="bg-light rounded-3 p-3 flex-grow-1">
+                    <div class="fw-bold small mb-2 text-primary">AI Tutor</div>
+                    <div class="response-content">${formatResponse(escapeHtml(response))}</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    modalContent.innerHTML = conversationHTML;
+    
+    // Show the modal
+    try {
+        const modal = new bootstrap.Modal(document.getElementById('conversationModal'));
+        modal.show();
+    } catch (error) {
+        console.error('Error showing modal:', error);
+        // Fallback: try to show modal using jQuery if Bootstrap 5 fails
+        if (typeof $ !== 'undefined') {
+            $('#conversationModal').modal('show');
+        }
+    }
+}
+
+// Add some CSS for better styling
+const style = document.createElement('style');
+style.textContent = `
+    .conversation-container {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    
+    .response-content {
+        line-height: 1.6;
+        word-wrap: break-word;
+    }
+    
+    .view-conversation-btn {
+        transition: all 0.2s ease;
+    }
+    
+    .view-conversation-btn:hover {
+        transform: translateY(-1px);
+    }
+    
+    .pagination .page-link {
+        border-radius: 0.375rem;
+        margin: 0 0.125rem;
+        border: 1px solid #dee2e6;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+    }
+    
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

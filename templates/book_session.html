@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Book Session - SmartTutor{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>Book a Session</h3>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Tutor Info -->
+                    <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
+                        <img src="{{ tutor.avatar or 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&dpr=2' }}" 
+                             alt="{{ tutor.name }}" class="rounded-circle me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                        <div>
+                            <h4 class="mb-1">{{ tutor.name }}</h4>
+                            <div class="text-warning mb-2">
+                                {% for i in range(5) %}
+                                    {% if i < tutor.rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="text-muted ms-2">{{ tutor.rating or 0 }} ({{ tutor.total_sessions }} sessions)</span>
+                            </div>
+                            <div class="h5 text-success mb-0">${{ tutor.hourly_rate }}/hour</div>
+                        </div>
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="subject" class="form-label">Subject</label>
+                                <select class="form-select" id="subject" name="subject" required>
+                                    <option value="">Select a subject</option>
+                                    {% if tutor.subjects %}
+                                        {% for subject in tutor.subjects %}
+                                        <option value="{{ subject }}">{{ subject }}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="duration" class="form-label">Duration</label>
+                                <select class="form-select" id="duration" name="duration" required onchange="calculatePrice()">
+                                    <option value="">Select duration</option>
+                                    <option value="30">30 minutes</option>
+                                    <option value="60">1 hour</option>
+                                    <option value="90">1.5 hours</option>
+                                    <option value="120">2 hours</option>
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="date" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="date" name="date" required 
+                                       min="{{ (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d') }}">
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="time" class="form-label">Time</label>
+                                <input type="time" class="form-control" id="time" name="time" required>
+                            </div>
+                            
+                            <div class="col-12">
+                                <label for="notes" class="form-label">Notes (Optional)</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                          placeholder="Any specific topics or goals for this session?"></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Price Display -->
+                        <div class="alert alert-info mt-4" id="priceDisplay" style="display: none;">
+                            <h5 class="mb-0">Total Cost: $<span id="totalPrice">0</span></h5>
+                        </div>
+                        
+                        <div class="d-flex gap-3 mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check me-2"></i>Book Session
+                            </button>
+                            <a href="{{ url_for('tutors') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Tutors
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculatePrice() {
+    const duration = document.getElementById('duration').value;
+    const hourlyRate = {{ tutor.hourly_rate }};
+    
+    if (duration) {
+        const totalPrice = (hourlyRate * duration / 60).toFixed(2);
+        document.getElementById('totalPrice').textContent = totalPrice;
+        document.getElementById('priceDisplay').style.display = 'block';
+    } else {
+        document.getElementById('priceDisplay').style.display = 'none';
+    }
+}
+
+// Set minimum date to tomorrow
+document.addEventListener('DOMContentLoaded', function() {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById('date').min = tomorrow.toISOString().split('T')[0];
+});
+</script>
+{% endblock %}

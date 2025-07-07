@@ -1,0 +1,17 @@
+{% extends "chat.html" %}
+{% block title %}AI Tutor - Step-by-Step Explanations{% endblock %}
+{% block content %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Force explanation mode on load
+    if (window.ChatInterface) {
+        ChatInterface.prototype.currentConversationType = 'explanation';
+        document.getElementById('questionInput').placeholder = 'What topic would you like me to explain?';
+        document.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.action === 'explanation');
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI Tutor{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="display-5 fw-bold mb-4 text-center">AI Tutor Dashboard</h1>
+    <div class="row g-4 justify-content-center">
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow feature-card">
+                <div class="card-body text-center">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:70px; height:70px;">
+                        <i class="fas fa-lightbulb text-primary fs-2"></i>
+                    </div>
+                    <h5 class="card-title">Step-by-Step Explanations</h5>
+                    <p class="card-text text-muted">Get detailed, easy-to-understand explanations for any topic or question.</p>
+                    <a href="{{ url_for('chat_explanation') }}" class="btn btn-outline-primary btn-sm mt-2">Try Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow feature-card">
+                <div class="card-body text-center">
+                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:70px; height:70px;">
+                        <i class="fas fa-dumbbell text-success fs-2"></i>
+                    </div>
+                    <h5 class="card-title">Practice Problems</h5>
+                    <p class="card-text text-muted">Generate practice problems with solutions for any subject or concept.</p>
+                    <a href="{{ url_for('chat_practice') }}" class="btn btn-outline-success btn-sm mt-2">Try Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow feature-card">
+                <div class="card-body text-center">
+                    <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:70px; height:70px;">
+                        <i class="fas fa-question-circle text-warning fs-2"></i>
+                    </div>
+                    <h5 class="card-title">Interactive Quizzes</h5>
+                    <p class="card-text text-muted">Create custom quizzes to test your knowledge and track your progress.</p>
+                    <a href="{{ url_for('chat_quiz') }}" class="btn btn-outline-warning btn-sm mt-2">Try Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 border-0 shadow feature-card">
+                <div class="card-body text-center">
+                    <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:70px; height:70px;">
+                        <i class="fas fa-sticky-note text-info fs-2"></i>
+                    </div>
+                    <h5 class="card-title">Study Notes</h5>
+                    <p class="card-text text-muted">Generate comprehensive study notes with key concepts and tips.</p>
+                    <a href="{{ url_for('chat_study_notes') }}" class="btn btn-outline-info btn-sm mt-2">Try Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+.feature-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.feature-card:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.12) !important;
+}
+</style>
+{% endblock %}

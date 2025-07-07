@@ -1,0 +1,103 @@
+{% extends "chat.html" %}
+{% block title %}AI Tutor - Study Notes{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4 text-center">Your Study Notes</h2>
+    {% if conversations %}
+    <div class="row g-4 mb-5">
+        {% for conv in conversations %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow feature-card">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-2 text-primary fw-bold">
+                        <i class="fas fa-sticky-note me-2"></i>
+                        {{ conv.subject or "Study Notes" }}
+                    </div>
+                    <div class="mb-2 small text-muted">
+                        {{ conv.created_at.strftime('%b %d, %Y %I:%M %p') }}
+                    </div>
+                    <div class="mb-3 flex-grow-1">
+                        <div class="fw-semibold mb-1">Topic:</div>
+                        <div class="mb-2">{{ conv.question[:80] }}{% if conv.question|length > 80 %}...{% endif %}</div>
+                        <div class="fw-semibold mb-1">Notes:</div>
+                        <div class="text-muted" style="max-height: 120px; overflow-y: auto; font-size: 0.95em;">
+                            {{ conv.response[:300]|safe }}{% if conv.response|length > 300 %}...{% endif %}
+                        </div>
+                    </div>
+                    <div class="mt-auto d-flex gap-2">
+                        <button class="btn btn-outline-primary btn-sm view-study-note-btn"
+                                data-question="{{ conv.question|e }}"
+                                data-response="{{ conv.response|e }}">
+                            <i class="fas fa-eye me-1"></i>View Full
+                        </button>
+                        <a class="btn btn-primary btn-sm"
+                           href="{{ url_for('chat_study_notes') }}?question={{ conv.question|urlencode }}">
+                            <i class="fas fa-arrow-right me-1"></i>Continue
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center text-muted py-5">
+        <i class="fas fa-sticky-note fa-3x mb-3"></i>
+        <h5>No study notes created yet.</h5>
+        <p>Start a new study notes chat to see your notes here.</p>
+    </div>
+    {% endif %}
+</div>
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Force study_notes mode on load
+    if (window.ChatInterface) {
+        ChatInterface.prototype.currentConversationType = 'study_notes';
+        document.getElementById('questionInput').placeholder = 'What topic do you need study notes for?';
+        document.querySelectorAll('.quick-action-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.action === 'study_notes');
+        });
+    }
+
+    // View full study note modal
+    document.querySelectorAll('.view-study-note-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const question = this.getAttribute('data-question');
+            const response = this.getAttribute('data-response');
+            showStudyNoteModal(question, response);
+        });
+    });
+});
+
+function showStudyNoteModal(question, response) {
+    let modal = document.getElementById('studyNoteModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'studyNoteModal';
+        modal.tabIndex = -1;
+        modal.innerHTML = `
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Study Notes</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3"><strong>Topic:</strong> <span id="modalStudyNoteTopic"></span></div>
+                    <div><strong>Notes:</strong></div>
+                    <div id="modalStudyNoteContent" class="mt-2" style="white-space: pre-line;"></div>
+                </div>
+            </div>
+        </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    document.getElementById('modalStudyNoteTopic').textContent = question;
+    document.getElementById('modalStudyNoteContent').innerHTML = response.replace(/\n/g, '<br>');
+    const bsModal = new bootstrap.Modal(modal);
+    bsModal.show();
+}
+</script>
+{% endblock %}
