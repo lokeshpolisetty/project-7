@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 import json
 import google.generativeai as genai
 from werkzeug.utils import secure_filename
+import re
 
 load_dotenv()
 
@@ -204,7 +205,6 @@ def parse_quiz_response(response):
     quiz = []
     regex = r'Q(\d+):\s*(.*?)\nA\)\s*(.*?)\nB\)\s*(.*?)\nC\)\s*(.*?)\nD\)\s*(.*?)\nCorrect Answer:\s*([A-D])\nExplanation:\s*(.*?)(?=\n\nQ\d+:|$)'
     
-    import re
     matches = re.finditer(regex, response, re.DOTALL)
     
     for match in matches:
@@ -257,10 +257,10 @@ def login():
             session['user_id'] = user['id']
             session['user_name'] = user['name']
             session['user_role'] = user['role']
-            flash('Login successful!', 'success')
-            return redirect(url_for('dashboard'))  # Redirect to dashboard
+            flash('Welcome back! Login successful.', 'success')
+            return redirect(url_for('dashboard'))
         else:
-            flash('Invalid email or password', 'error')
+            flash('Invalid email or password. Please try again.', 'error')
     
     return render_template('login.html')
 
@@ -278,7 +278,7 @@ def register():
         # Check if user exists
         cur.execute('SELECT id FROM users WHERE email = %s', (email,))
         if cur.fetchone():
-            flash('Email already registered', 'error')
+            flash('Email already registered. Please use a different email.', 'error')
             cur.close()
             conn.close()
             return render_template('register.html')
@@ -294,7 +294,7 @@ def register():
         cur.close()
         conn.close()
         
-        flash('Registration successful! Please login.', 'success')
+        flash('Account created successfully! Please login to continue.', 'success')
         return redirect(url_for('login'))
     
     return render_template('register.html')
@@ -376,7 +376,7 @@ def book_session(tutor_id):
         conn.close()
         
         flash('Session booked successfully!', 'success')
-        return redirect(url_for('chat'))  # Redirect to chat after booking
+        return redirect(url_for('chat'))
     
     cur.close()
     conn.close()
@@ -417,7 +417,7 @@ def ai_chat():
         if not user:
             cur.close()
             conn.close()
-            session.clear()  # Clear invalid session
+            session.clear()
             return jsonify({'error': 'User not found'}), 404
         
         data = request.get_json()
@@ -449,7 +449,6 @@ def ai_chat():
         })
         
     except Exception as e:
-        # Log the error for debugging
         print(f"Error in ai_chat: {str(e)}")
         return jsonify({'error': 'An error occurred processing your request'}), 500
         
@@ -640,7 +639,7 @@ def change_password():
 @app.route('/logout')
 def logout():
     session.clear()
-    flash('Logged out successfully', 'success')
+    flash('You have been logged out successfully.', 'success')
     return redirect(url_for('home'))
 
 @app.route('/chat')
@@ -761,7 +760,7 @@ def delete_history():
     conn.commit()
     cur.close()
     conn.close()
-    flash('All chat history deleted.', 'success')
+    flash('All chat history deleted successfully.', 'success')
     return redirect(url_for('history'))
 
 @app.route('/history/delete/<int:conv_id>', methods=['POST'])
@@ -775,7 +774,7 @@ def delete_conversation(conv_id):
     conn.commit()
     cur.close()
     conn.close()
-    flash('Conversation deleted.', 'success')
+    flash('Conversation deleted successfully.', 'success')
     return redirect(url_for('history'))
 
 @app.route('/dashboard')

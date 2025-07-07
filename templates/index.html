@@ -1,248 +1,971 @@
 {% extends "base.html" %}
 
+{% block title %}AI Tutor - Your Personal Learning Assistant{% endblock %}
+
 {% block content %}
-<!-- Hero Section -->
-<div class="hero-section">
-    <div class="container">
-        <div class="row align-items-center min-vh-100">
-            <div class="col-lg-6">
-                <h1 class="display-3 fw-bold text-white mb-4">Your AI Learning Assistant</h1>
-                <p class="lead text-white-50 mb-4">Get instant help with any subject. Ask questions, generate practice problems, create quizzes, and receive personalized explanations powered by advanced AI.</p>
-                <div class="d-flex gap-3 flex-wrap">
-                    <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">
-                        <i class="fas fa-rocket me-2"></i>Get Started Free
+<div class="landing-page">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-background">
+            <div class="floating-elements">
+                <div class="floating-element" style="--delay: 0s; --duration: 8s;">📚</div>
+                <div class="floating-element" style="--delay: 2s; --duration: 10s;">🧠</div>
+                <div class="floating-element" style="--delay: 4s; --duration: 12s;">💡</div>
+                <div class="floating-element" style="--delay: 6s; --duration: 9s;">🎯</div>
+                <div class="floating-element" style="--delay: 1s; --duration: 11s;">⚡</div>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-6">
+                    <div class="hero-content">
+                        <div class="hero-badge">
+                            <i class="fas fa-sparkles me-2"></i>
+                            Powered by Advanced AI
+                        </div>
+                        
+                        <h1 class="hero-title">
+                            Your <span class="gradient-text">AI Learning</span><br>
+                            Assistant is Here
+                        </h1>
+                        
+                        <p class="hero-subtitle">
+                            Get instant help with any subject. Ask questions, generate practice problems, 
+                            create quizzes, and receive personalized explanations powered by cutting-edge AI technology.
+                        </p>
+                        
+                        <div class="hero-actions">
+                            <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg hero-btn">
+                                <i class="fas fa-rocket me-2"></i>Start Learning Free
+                            </a>
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg hero-btn">
+                                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                            </a>
+                        </div>
+                        
+                        <div class="hero-features">
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>100% Free to Use</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Instant AI Responses</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span>All Subjects Covered</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6">
+                    <div class="hero-demo">
+                        <div class="demo-window">
+                            <div class="demo-header">
+                                <div class="demo-controls">
+                                    <span class="control red"></span>
+                                    <span class="control yellow"></span>
+                                    <span class="control green"></span>
+                                </div>
+                                <div class="demo-title">
+                                    <i class="fas fa-robot me-2"></i>AI Tutor Chat
+                                </div>
+                            </div>
+                            
+                            <div class="demo-content">
+                                <div class="demo-messages">
+                                    <div class="demo-message user-msg">
+                                        <div class="message-bubble">
+                                            Explain photosynthesis in simple terms
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="demo-message ai-msg">
+                                        <div class="ai-avatar">
+                                            <i class="fas fa-brain"></i>
+                                        </div>
+                                        <div class="message-bubble">
+                                            <div class="typing-indicator" id="typingIndicator">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+                                            <div class="ai-response" id="aiResponse" style="display: none;">
+                                                <strong>Photosynthesis Explained Simply:</strong><br><br>
+                                                Photosynthesis is how plants make their own food using sunlight! 🌱<br><br>
+                                                <strong>🔹 Ingredients:</strong> Plants take in CO₂ from air and water from soil<br>
+                                                <strong>🔹 Energy source:</strong> Sunlight provides the power<br>
+                                                <strong>🔹 The magic:</strong> Chlorophyll captures sunlight<br>
+                                                <strong>🔹 Result:</strong> Plants create glucose and release oxygen
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Powerful AI Learning Features</h2>
+                <p class="section-subtitle">Everything you need to master any subject with AI assistance</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card explanation-feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3 class="feature-title">Step-by-Step Explanations</h3>
+                    <p class="feature-description">
+                        Get detailed, easy-to-understand explanations for complex topics broken down into digestible steps.
+                    </p>
+                    <div class="feature-stats">
+                        <span class="stat">
+                            <i class="fas fa-brain me-1"></i>AI-Powered
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-infinity me-1"></i>Unlimited
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="feature-card practice-feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-dumbbell"></i>
+                    </div>
+                    <h3 class="feature-title">Practice Problems</h3>
+                    <p class="feature-description">
+                        Generate unlimited practice problems with detailed solutions for any subject or concept you're studying.
+                    </p>
+                    <div class="feature-stats">
+                        <span class="stat">
+                            <i class="fas fa-chart-line me-1"></i>Adaptive
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-target me-1"></i>Targeted
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="feature-card quiz-feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3 class="feature-title">Interactive Quizzes</h3>
+                    <p class="feature-description">
+                        Create custom quizzes to test your knowledge, track progress, and identify areas for improvement.
+                    </p>
+                    <div class="feature-stats">
+                        <span class="stat">
+                            <i class="fas fa-stopwatch me-1"></i>Timed
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-medal me-1"></i>Scored
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="feature-card notes-feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-sticky-note"></i>
+                    </div>
+                    <h3 class="feature-title">Study Notes</h3>
+                    <p class="feature-description">
+                        Generate comprehensive study notes with key concepts, formulas, and important tips for any topic.
+                    </p>
+                    <div class="feature-stats">
+                        <span class="stat">
+                            <i class="fas fa-bookmark me-1"></i>Organized
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-download me-1"></i>Exportable
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Subjects Section -->
+    <section class="subjects-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">All Subjects Covered</h2>
+                <p class="section-subtitle">Get expert help with any topic, from basic concepts to advanced theories</p>
+            </div>
+            
+            <div class="subjects-grid">
+                <div class="subject-card math-subject">
+                    <div class="subject-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h4 class="subject-title">Mathematics</h4>
+                    <p class="subject-description">Algebra, Calculus, Geometry, Statistics, Trigonometry</p>
+                    <div class="subject-overlay">
+                        <div class="overlay-content">
+                            <h5>Mathematics Topics</h5>
+                            <ul>
+                                <li>Algebra & Linear Equations</li>
+                                <li>Calculus & Derivatives</li>
+                                <li>Geometry & Trigonometry</li>
+                                <li>Statistics & Probability</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="subject-card science-subject">
+                    <div class="subject-icon">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <h4 class="subject-title">Science</h4>
+                    <p class="subject-description">Physics, Chemistry, Biology, Earth Science</p>
+                    <div class="subject-overlay">
+                        <div class="overlay-content">
+                            <h5>Science Topics</h5>
+                            <ul>
+                                <li>Physics & Mechanics</li>
+                                <li>Chemistry & Reactions</li>
+                                <li>Biology & Life Sciences</li>
+                                <li>Earth & Environmental Science</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="subject-card literature-subject">
+                    <div class="subject-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h4 class="subject-title">Literature</h4>
+                    <p class="subject-description">English, Writing, Reading Comprehension, Essays</p>
+                    <div class="subject-overlay">
+                        <div class="overlay-content">
+                            <h5>Literature Topics</h5>
+                            <ul>
+                                <li>English Literature</li>
+                                <li>Creative Writing</li>
+                                <li>Reading Comprehension</li>
+                                <li>Essay Writing</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="subject-card programming-subject">
+                    <div class="subject-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <h4 class="subject-title">Programming</h4>
+                    <p class="subject-description">Python, JavaScript, Java, Web Development</p>
+                    <div class="subject-overlay">
+                        <div class="overlay-content">
+                            <h5>Programming Topics</h5>
+                            <ul>
+                                <li>Python & Data Science</li>
+                                <li>JavaScript & Web Dev</li>
+                                <li>Java & Object-Oriented</li>
+                                <li>Algorithms & Data Structures</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="subject-card history-subject">
+                    <div class="subject-icon">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <h4 class="subject-title">History</h4>
+                    <p class="subject-description">World History, American History, Ancient Civilizations</p>
+                    <div class="subject-overlay">
+                        <div class="overlay-content">
+                            <h5>History Topics</h5>
+                            <ul>
+                                <li>World History</li>
+                                <li>American History</li>
+                                <li>Ancient Civilizations</li>
+                                <li>Modern History</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="subject-card economics-subject">
+                    <div class="subject-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4 class="subject-title">Economics</h4>
+                    <p class="subject-description">Microeconomics, Macroeconomics, Business Studies</p>
+                    <div class="subject-overlay">
+                        <div class="overlay-content">
+                            <h5>Economics Topics</h5>
+                            <ul>
+                                <li>Microeconomics</li>
+                                <li>Macroeconomics</li>
+                                <li>Business Studies</li>
+                                <li>Financial Markets</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <div class="cta-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h2 class="cta-title">Ready to Transform Your Learning?</h2>
+                <p class="cta-subtitle">
+                    Join thousands of students already using AI Tutor to improve their grades and understanding. 
+                    Start your learning journey today - it's completely free!
+                </p>
+                <div class="cta-actions">
+                    <a href="{{ url_for('register') }}" class="btn btn-light btn-lg cta-btn primary">
+                        <i class="fas fa-user-plus me-2"></i>Get Started Free
                     </a>
-                    <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg cta-btn">
                         <i class="fas fa-sign-in-alt me-2"></i>Sign In
                     </a>
                 </div>
-                <div class="d-flex gap-4 mt-4 text-white-50">
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-check-circle me-2"></i>
-                        <span>Free to use</span>
+                <div class="cta-features">
+                    <div class="cta-feature">
+                        <i class="fas fa-check"></i>
+                        <span>No Credit Card Required</span>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-check-circle me-2"></i>
-                        <span>Instant responses</span>
+                    <div class="cta-feature">
+                        <i class="fas fa-check"></i>
+                        <span>Instant Access</span>
                     </div>
-                    <div class="d-flex align-items-center">
-                        <i class="fas fa-check-circle me-2"></i>
-                        <span>All subjects</span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="chat-preview bg-white rounded-4 shadow-lg p-4">
-                    <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                        <div class="bg-primary rounded-circle p-2 me-3">
-                            <i class="fas fa-robot text-white"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0">AI Tutor</h6>
-                            <small class="text-muted">Always ready to help</small>
-                        </div>
-                    </div>
-                    
-                    <div class="chat-messages" style="height: 300px; overflow-y: auto;">
-                        <div class="message-bubble user-message mb-3">
-                            <div class="bg-primary text-white rounded-3 p-3 ms-auto" style="max-width: 80%;">
-                                Explain photosynthesis in simple terms
-                            </div>
-                        </div>
-                        
-                        <div class="message-bubble ai-message mb-3">
-                            <div class="bg-light rounded-3 p-3" style="max-width: 80%;">
-                                <strong>Photosynthesis Explained Simply:</strong><br><br>
-                                Photosynthesis is how plants make their own food using sunlight! Here's the process:<br><br>
-                                <strong>1. Ingredients:</strong> Plants take in carbon dioxide from air and water from soil<br>
-                                <strong>2. Energy source:</strong> Sunlight provides the energy<br>
-                                <strong>3. The magic:</strong> Chlorophyll (green stuff in leaves) captures sunlight<br>
-                                <strong>4. Result:</strong> Plants create glucose (sugar) for food and release oxygen
-                            </div>
-                        </div>
-                        
-                        <div class="message-bubble user-message mb-3">
-                            <div class="bg-primary text-white rounded-3 p-3 ms-auto" style="max-width: 80%;">
-                                Can you create a quiz about this?
-                            </div>
-                        </div>
-                        
-                        <div class="message-bubble ai-message">
-                            <div class="bg-light rounded-3 p-3" style="max-width: 80%;">
-                                <strong>Photosynthesis Quiz:</strong><br><br>
-                                <strong>Q1:</strong> What do plants need for photosynthesis?<br>
-                                A) Only water<br>
-                                B) Sunlight, water, and carbon dioxide<br>
-                                C) Only sunlight<br>
-                                <strong>Answer: B</strong>
-                            </div>
-                        </div>
+                    <div class="cta-feature">
+                        <i class="fas fa-check"></i>
+                        <span>24/7 AI Support</span>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 
-<!-- Features Section -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold">Powerful AI Learning Features</h2>
-            <p class="lead text-muted">Everything you need to master any subject</p>
-        </div>
-        
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 shadow-sm text-center">
-                    <div class="card-body">
-                        <div class="feature-icon bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
-                            <i class="fas fa-lightbulb text-primary fs-4"></i>
-                        </div>
-                        <h5 class="card-title">Step-by-Step Explanations</h5>
-                        <p class="card-text text-muted">Get detailed explanations for complex topics broken down into easy-to-understand steps</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 shadow-sm text-center">
-                    <div class="card-body">
-                        <div class="feature-icon bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
-                            <i class="fas fa-dumbbell text-success fs-4"></i>
-                        </div>
-                        <h5 class="card-title">Practice Problems</h5>
-                        <p class="card-text text-muted">Generate unlimited practice problems with solutions for any subject or topic</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 shadow-sm text-center">
-                    <div class="card-body">
-                        <div class="feature-icon bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
-                            <i class="fas fa-question-circle text-warning fs-4"></i>
-                        </div>
-                        <h5 class="card-title">Interactive Quizzes</h5>
-                        <p class="card-text text-muted">Create custom quizzes to test your knowledge and track your progress</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-6 col-lg-3">
-                <div class="card h-100 border-0 shadow-sm text-center">
-                    <div class="card-body">
-                        <div class="feature-icon bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
-                            <i class="fas fa-sticky-note text-info fs-4"></i>
-                        </div>
-                        <h5 class="card-title">Study Notes</h5>
-                        <p class="card-text text-muted">Generate comprehensive study notes with key concepts and formulas</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Subjects Section -->
-<section class="py-5">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold">All Subjects Covered</h2>
-            <p class="lead text-muted">Get help with any topic, from basic concepts to advanced theories</p>
-        </div>
-        
-        <div class="row g-4">
-            <div class="col-md-6 col-lg-3">
-                <div class="subject-card text-center p-4">
-                    <div class="subject-icon bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
-                        <i class="fas fa-calculator text-primary fs-3"></i>
-                    </div>
-                    <h5>Mathematics</h5>
-                    <p class="text-muted small">Algebra, Calculus, Geometry, Statistics</p>
-                </div>
-            </div>
-            
-            <div class="col-md-6 col-lg-3">
-                <div class="subject-card text-center p-4">
-                    <div class="subject-icon bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
-                        <i class="fas fa-flask text-success fs-3"></i>
-                    </div>
-                    <h5>Science</h5>
-                    <p class="text-muted small">Physics, Chemistry, Biology, Earth Science</p>
-                </div>
-            </div>
-            
-            <div class="col-md-6 col-lg-3">
-                <div class="subject-card text-center p-4">
-                    <div class="subject-icon bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
-                        <i class="fas fa-book text-warning fs-3"></i>
-                    </div>
-                    <h5>Literature</h5>
-                    <p class="text-muted small">English, Writing, Reading Comprehension</p>
-                </div>
-            </div>
-            
-            <div class="col-md-6 col-lg-3">
-                <div class="subject-card text-center p-4">
-                    <div class="subject-icon bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3">
-                        <i class="fas fa-laptop-code text-info fs-3"></i>
-                    </div>
-                    <h5>Programming</h5>
-                    <p class="text-muted small">Python, JavaScript, Java, Web Development</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- CTA Section -->
-<section class="py-5 bg-primary text-white">
-    <div class="container text-center">
-        <h2 class="display-5 fw-bold mb-4">Ready to Start Learning?</h2>
-        <p class="lead mb-4">Join thousands of students already using AI Tutor to improve their grades and understanding.</p>
-        <div class="d-flex gap-3 justify-content-center flex-wrap">
-            <a href="{{ url_for('register') }}" class="btn btn-light btn-lg">
-                <i class="fas fa-user-plus me-2"></i>Sign Up Free
-            </a>
-            <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">
-                <i class="fas fa-sign-in-alt me-2"></i>Sign In
-            </a>
-        </div>
-    </div>
-</section>
-
 <style>
+.landing-page {
+    overflow-x: hidden;
+}
+
+/* Hero Section */
 .hero-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.feature-icon, .subject-icon {
-    width: 60px;
-    height: 60px;
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
 }
 
-.subject-card {
-    transition: transform 0.3s ease;
+.floating-elements {
+    position: absolute;
+    width: 100%;
+    height: 100%;
 }
 
-.subject-card:hover {
-    transform: translateY(-5px);
+.floating-element {
+    position: absolute;
+    font-size: 2rem;
+    opacity: 0.1;
+    animation: float var(--duration, 10s) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
 }
 
-.chat-preview {
+.floating-element:nth-child(1) { top: 20%; left: 10%; }
+.floating-element:nth-child(2) { top: 60%; left: 80%; }
+.floating-element:nth-child(3) { top: 30%; left: 70%; }
+.floating-element:nth-child(4) { top: 80%; left: 20%; }
+.floating-element:nth-child(5) { top: 10%; left: 50%; }
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    color: white;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    animation: slideInLeft 0.8s ease-out;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    animation: slideInLeft 0.8s ease-out 0.2s both;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    line-height: 1.6;
+    opacity: 0.9;
+    margin-bottom: 2.5rem;
+    animation: slideInLeft 0.8s ease-out 0.4s both;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    animation: slideInLeft 0.8s ease-out 0.6s both;
+}
+
+.hero-btn {
+    padding: 1rem 2rem;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.hero-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.hero-features {
+    display: flex;
+    gap: 2rem;
+    animation: slideInLeft 0.8s ease-out 0.8s both;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.feature-item i {
+    color: #ffd700;
+}
+
+/* Hero Demo */
+.hero-demo {
+    position: relative;
+    z-index: 2;
+    animation: slideInRight 0.8s ease-out 0.4s both;
+}
+
+.demo-window {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
     max-width: 500px;
     margin: 0 auto;
 }
 
-.message-bubble {
+.demo-header {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.demo-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.control {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.control.red { background: #ff5f57; }
+.control.yellow { background: #ffbd2e; }
+.control.green { background: #28ca42; }
+
+.demo-title {
+    font-weight: 600;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+}
+
+.demo-content {
+    padding: 1.5rem;
+    height: 300px;
+    overflow-y: auto;
+}
+
+.demo-message {
+    margin-bottom: 1rem;
+}
+
+.user-msg {
+    text-align: right;
+}
+
+.user-msg .message-bubble {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 18px 18px 4px 18px;
+    padding: 12px 16px;
+    display: inline-block;
+    max-width: 80%;
+    font-weight: 500;
+}
+
+.ai-msg {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.ai-avatar {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+}
+
+.ai-msg .message-bubble {
+    background: #f8f9fa;
+    border-radius: 18px 18px 18px 4px;
+    padding: 12px 16px;
+    max-width: 80%;
+    color: #2c3e50;
+    line-height: 1.5;
+}
+
+.typing-indicator {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: #667eea;
+    border-radius: 50%;
+    animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-10px); }
+}
+
+/* Features Section */
+.features-section {
+    padding: 6rem 0;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.section-subtitle {
+    font-size: 1.2rem;
+    color: #6c757d;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.feature-card {
+    background: white;
+    border-radius: 24px;
+    padding: 2.5rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient);
+}
+
+.explanation-feature { --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.practice-feature { --gradient: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+.quiz-feature { --gradient: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); }
+.notes-feature { --gradient: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%); }
+
+.feature-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--gradient);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    margin: 0 auto 1.5rem;
+}
+
+.feature-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.feature-description {
+    color: #6c757d;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.feature-stats {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.stat {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Subjects Section */
+.subjects-section {
+    padding: 6rem 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.subjects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.subject-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.subject-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+}
+
+.subject-card:hover .subject-overlay {
+    opacity: 1;
+    visibility: visible;
+}
+
+.subject-icon {
+    width: 70px;
+    height: 70px;
+    background: var(--subject-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: white;
+    margin: 0 auto 1.5rem;
+}
+
+.math-subject { --subject-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.science-subject { --subject-gradient: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+.literature-subject { --subject-gradient: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%); }
+.programming-subject { --subject-gradient: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%); }
+.history-subject { --subject-gradient: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%); }
+.economics-subject { --subject-gradient: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); }
+
+.subject-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.75rem;
+}
+
+.subject-description {
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+.subject-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--subject-gradient);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.overlay-content h5 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.overlay-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.overlay-content li {
+    padding: 0.25rem 0;
+    font-weight: 500;
+}
+
+/* CTA Section */
+.cta-section {
+    padding: 6rem 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+}
+
+.cta-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.cta-icon {
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    margin: 0 auto 2rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+.cta-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.cta-subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+}
+
+.cta-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.cta-btn {
+    padding: 1rem 2rem;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.cta-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.cta-btn.primary {
+    background: white;
+    color: #667eea;
+}
+
+.cta-features {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    opacity: 0.9;
+}
+
+.cta-feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.cta-feature i {
+    color: #ffd700;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-actions {
+        flex-direction: column;
+    }
+    
+    .hero-features {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .features-grid,
+    .subjects-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cta-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .cta-features {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+    }
+    
+    .demo-window {
+        margin: 0 1rem;
+    }
+}
+
+/* Animation for demo */
+.ai-response {
     animation: fadeIn 0.5s ease-in;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+/* Start demo animation after page load */
+window.addEventListener('load', function() {
+    setTimeout(() => {
+        document.getElementById('typingIndicator').style.display = 'none';
+        document.getElementById('aiResponse').style.display = 'block';
+    }, 3000);
+});
 </style>
+
+<script>
+// Demo animation
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        document.getElementById('typingIndicator').style.display = 'none';
+        document.getElementById('aiResponse').style.display = 'block';
+    }, 3000);
+    
+    // Restart animation every 10 seconds
+    setInterval(() => {
+        document.getElementById('aiResponse').style.display = 'none';
+        document.getElementById('typingIndicator').style.display = 'flex';
+        
+        setTimeout(() => {
+            document.getElementById('typingIndicator').style.display = 'none';
+            document.getElementById('aiResponse').style.display = 'block';
+        }, 3000);
+    }, 10000);
+});
+</script>
 {% endblock %}
