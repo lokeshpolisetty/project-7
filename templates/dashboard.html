@@ -3,74 +3,433 @@
 {% block title %}Dashboard - AI Tutor{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <h1 class="display-5 fw-bold mb-4 text-center">AI Tutor Dashboard</h1>
-    <div class="row g-4 justify-content-center">
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow feature-card">
-                <div class="card-body text-center">
-                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:70px; height:70px;">
-                        <i class="fas fa-lightbulb text-primary fs-2"></i>
+<div class="dashboard-page">
+    <div class="container py-5">
+        <!-- Welcome Header -->
+        <div class="welcome-section text-center mb-5">
+            <div class="welcome-icon mb-3">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h1 class="display-4 fw-bold mb-3">Welcome back, {{ session.user_name }}!</h1>
+            <p class="lead text-muted">Choose your learning adventure and start exploring</p>
+        </div>
+
+        <!-- Feature Cards -->
+        <div class="features-grid">
+            <div class="row g-4 justify-content-center">
+                <!-- Step-by-Step Explanations -->
+                <div class="col-lg-6 col-xl-3">
+                    <div class="feature-card explanation-card">
+                        <div class="card-glow"></div>
+                        <div class="feature-icon">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <h4 class="feature-title">Step-by-Step Explanations</h4>
+                        <p class="feature-description">Get detailed, easy-to-understand explanations for any topic or question</p>
+                        <div class="feature-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-brain me-1"></i>
+                                AI-Powered
+                            </span>
+                        </div>
+                        <a href="{{ url_for('chat_explanation') }}" class="feature-btn">
+                            <span>Start Learning</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
                     </div>
-                    <h5 class="card-title">Step-by-Step Explanations</h5>
-                    <p class="card-text text-muted">Get detailed, easy-to-understand explanations for any topic or question.</p>
-                    <a href="{{ url_for('chat_explanation') }}" class="btn btn-outline-primary btn-sm mt-2">Try Now</a>
+                </div>
+
+                <!-- Practice Problems -->
+                <div class="col-lg-6 col-xl-3">
+                    <div class="feature-card practice-card">
+                        <div class="card-glow"></div>
+                        <div class="feature-icon">
+                            <i class="fas fa-dumbbell"></i>
+                        </div>
+                        <h4 class="feature-title">Practice Problems</h4>
+                        <p class="feature-description">Generate unlimited practice problems with solutions for any subject</p>
+                        <div class="feature-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-infinity me-1"></i>
+                                Unlimited
+                            </span>
+                        </div>
+                        <a href="{{ url_for('chat_practice') }}" class="feature-btn">
+                            <span>Start Practicing</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Interactive Quizzes -->
+                <div class="col-lg-6 col-xl-3">
+                    <div class="feature-card quiz-card">
+                        <div class="card-glow"></div>
+                        <div class="feature-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h4 class="feature-title">Interactive Quizzes</h4>
+                        <p class="feature-description">Create custom quizzes to test your knowledge and track progress</p>
+                        <div class="feature-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-chart-line me-1"></i>
+                                Track Progress
+                            </span>
+                        </div>
+                        <a href="{{ url_for('quiz_setup') }}" class="feature-btn quiz-btn">
+                            <span>Take Quiz</span>
+                            <i class="fas fa-play"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Study Notes -->
+                <div class="col-lg-6 col-xl-3">
+                    <div class="feature-card notes-card">
+                        <div class="card-glow"></div>
+                        <div class="feature-icon">
+                            <i class="fas fa-sticky-note"></i>
+                        </div>
+                        <h4 class="feature-title">Study Notes</h4>
+                        <p class="feature-description">Generate comprehensive study notes with key concepts and tips</p>
+                        <div class="feature-stats">
+                            <span class="stat-item">
+                                <i class="fas fa-bookmark me-1"></i>
+                                Organized
+                            </span>
+                        </div>
+                        <a href="{{ url_for('chat_study_notes') }}" class="feature-btn">
+                            <span>Create Notes</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow feature-card">
-                <div class="card-body text-center">
-                    <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:70px; height:70px;">
-                        <i class="fas fa-dumbbell text-success fs-2"></i>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions mt-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="quick-actions-card">
+                        <h5 class="text-center mb-4">
+                            <i class="fas fa-bolt me-2 text-warning"></i>
+                            Quick Actions
+                        </h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <a href="{{ url_for('chat') }}" class="quick-action-btn">
+                                    <i class="fas fa-comments"></i>
+                                    <span>General Chat</span>
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{{ url_for('history') }}" class="quick-action-btn">
+                                    <i class="fas fa-history"></i>
+                                    <span>Chat History</span>
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{{ url_for('profile') }}" class="quick-action-btn">
+                                    <i class="fas fa-user"></i>
+                                    <span>Profile</span>
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <h5 class="card-title">Practice Problems</h5>
-                    <p class="card-text text-muted">Generate practice problems with solutions for any subject or concept.</p>
-                    <a href="{{ url_for('chat_practice') }}" class="btn btn-outline-success btn-sm mt-2">Try Now</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow feature-card quiz-card">
-                <div class="card-body text-center">
-                    <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:70px; height:70px;">
-                        <i class="fas fa-question-circle text-warning fs-2"></i>
-                    </div>
-                    <h5 class="card-title">Interactive Quizzes</h5>
-                    <p class="card-text text-muted">Create custom quizzes to test your knowledge and track your progress.</p>
-                    <a href="{{ url_for('chat_quiz') }}" class="btn btn-outline-warning btn-sm mt-2">Start Quiz</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow feature-card">
-                <div class="card-body text-center">
-                    <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:70px; height:70px;">
-                        <i class="fas fa-sticky-note text-info fs-2"></i>
-                    </div>
-                    <h5 class="card-title">Study Notes</h5>
-                    <p class="card-text text-muted">Generate comprehensive study notes with key concepts and tips.</p>
-                    <a href="{{ url_for('chat_study_notes') }}" class="btn btn-outline-info btn-sm mt-2">Try Now</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <style>
-.feature-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.feature-card:hover {
-    transform: translateY(-5px) scale(1.03);
-    box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.12) !important;
+.dashboard-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
 }
 
-.quiz-card {
+.dashboard-page::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    opacity: 0.3;
+}
+
+.container {
     position: relative;
+    z-index: 1;
+}
+
+.welcome-section {
+    color: white;
+    margin-bottom: 3rem;
+}
+
+.welcome-icon {
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 3rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.features-grid {
+    margin-bottom: 3rem;
+}
+
+.feature-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 2rem;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.card-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.feature-card:hover .card-glow {
+    opacity: 1;
+    animation: rotate 4s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.explanation-card .feature-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.practice-card .feature-icon {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.quiz-card .feature-icon {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: white;
+}
+
+.notes-card .feature-icon {
+    background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+    color: white;
+}
+
+.feature-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    position: relative;
+    z-index: 2;
+}
+
+.feature-description {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    position: relative;
+    z-index: 2;
+}
+
+.feature-stats {
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.stat-item {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(0, 123, 255, 0.1);
+    color: #007bff;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.feature-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-decoration: none;
+    padding: 1rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
     overflow: hidden;
 }
 
-.quiz-card::before {
+.feature-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.feature-btn:hover::before {
+    left: 100%;
+}
+
+.feature-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
+.quiz-btn {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+}
+
+.quiz-btn:hover {
+    box-shadow: 0 10px 25px rgba(255, 193, 7, 0.4);
+}
+
+.quick-actions-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.quick-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    text-decoration: none;
+    padding: 1.5rem;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.quick-action-btn:hover {
+    background: rgba(102, 126, 234, 0.2);
+    border-color: #667eea;
+    transform: translateY(-3px);
+    color: #667eea;
+    text-decoration: none;
+}
+
+.quick-action-btn i {
+    font-size: 1.5rem;
+}
+
+.quick-action-btn span {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .features-grid .col-xl-3 {
+        margin-bottom: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .welcome-section h1 {
+        font-size: 2rem;
+    }
+    
+    .welcome-icon {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+    }
+    
+    .feature-card {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .quick-actions-card {
+        padding: 1.5rem;
+    }
+    
+    .quick-action-btn {
+        padding: 1rem;
+    }
+}
+
+/* Special Effects */
+.quiz-card {
+    position: relative;
+}
+
+.quiz-card::after {
     content: '';
     position: absolute;
     top: 0;
@@ -78,11 +437,38 @@
     right: 0;
     height: 4px;
     background: linear-gradient(90deg, #ffc107, #fd7e14);
+    border-radius: 24px 24px 0 0;
 }
 
 .quiz-card:hover {
-    transform: translateY(-8px) scale(1.05);
-    box-shadow: 0 1rem 2rem rgba(255, 193, 7, 0.2) !important;
+    animation: pulse-quiz 2s infinite;
+}
+
+@keyframes pulse-quiz {
+    0%, 100% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); }
+    50% { box-shadow: 0 8px 32px rgba(255, 193, 7, 0.3), 0 0 0 4px rgba(255, 193, 7, 0.1); }
+}
+
+/* Loading Animation */
+.feature-card {
+    animation: slideInUp 0.6s ease-out;
+    animation-fill-mode: both;
+}
+
+.feature-card:nth-child(1) { animation-delay: 0.1s; }
+.feature-card:nth-child(2) { animation-delay: 0.2s; }
+.feature-card:nth-child(3) { animation-delay: 0.3s; }
+.feature-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 </style>
 {% endblock %}

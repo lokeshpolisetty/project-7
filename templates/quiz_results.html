@@ -1,0 +1,740 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz Results - AI Tutor{% endblock %}
+
+{% block content %}
+<div class="quiz-results-page">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                <!-- Progress Steps -->
+                <div class="quiz-steps mb-5">
+                    <div class="step-indicator">
+                        <div class="step completed">
+                            <div class="step-number"><i class="fas fa-check"></i></div>
+                            <div class="step-label">Setup</div>
+                        </div>
+                        <div class="step-line completed"></div>
+                        <div class="step completed">
+                            <div class="step-number"><i class="fas fa-check"></i></div>
+                            <div class="step-label">Generate</div>
+                        </div>
+                        <div class="step-line completed"></div>
+                        <div class="step completed">
+                            <div class="step-number"><i class="fas fa-check"></i></div>
+                            <div class="step-label">Take Quiz</div>
+                        </div>
+                        <div class="step-line completed"></div>
+                        <div class="step active">
+                            <div class="step-number">4</div>
+                            <div class="step-label">Results</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Summary -->
+                <div class="results-summary" id="resultsSummary">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+
+                <!-- Detailed Review -->
+                <div class="detailed-review mt-5" id="detailedReview" style="display: none;">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons text-center mt-5">
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <button class="btn btn-primary btn-lg" id="reviewBtn">
+                            <i class="fas fa-list me-2"></i>Review Answers
+                        </button>
+                        <a href="{{ url_for('quiz_setup') }}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-redo me-2"></i>Take Another Quiz
+                        </a>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="fas fa-home me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.quiz-results-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* Progress Steps */
+.quiz-steps {
+    display: flex;
+    justify-content: center;
+}
+
+.step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.step.completed .step-number {
+    background: #28a745;
+    color: white;
+}
+
+.step.active .step-number {
+    background: #007bff;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.step-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.step.completed .step-label,
+.step.active .step-label {
+    color: #007bff;
+    font-weight: 600;
+}
+
+.step-line {
+    width: 60px;
+    height: 2px;
+    background: #e9ecef;
+    margin: 0 10px;
+    margin-bottom: 32px;
+}
+
+.step-line.completed {
+    background: #28a745;
+}
+
+/* Results Summary */
+.results-card {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    animation: slideInUp 0.8s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.results-header {
+    padding: 3rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.results-header.excellent {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.results-header.good {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+}
+
+.results-header.needs-improvement {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+}
+
+.results-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+.results-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: white;
+    position: relative;
+    z-index: 1;
+}
+
+.results-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.results-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.score-display {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 1.5rem;
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+}
+
+.score-number {
+    font-size: 3rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+}
+
+.score-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+}
+
+.results-body {
+    padding: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 1.5rem;
+}
+
+.stat-icon.correct {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.stat-icon.incorrect {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.stat-icon.accuracy {
+    background: rgba(0, 123, 255, 0.1);
+    color: #007bff;
+}
+
+.stat-icon.time {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* Performance Message */
+.performance-message {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.performance-message h4 {
+    margin-bottom: 1rem;
+}
+
+.performance-tips {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.performance-tips h6 {
+    color: #495057;
+    margin-bottom: 1rem;
+}
+
+.performance-tips ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.performance-tips li {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+/* Detailed Review */
+.review-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.review-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: between;
+    align-items: center;
+}
+
+.review-content {
+    padding: 2rem;
+}
+
+.question-review {
+    border: 1px solid #e9ecef;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.question-review:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.question-review.correct {
+    border-color: #28a745;
+    background: rgba(40, 167, 69, 0.05);
+}
+
+.question-review.incorrect {
+    border-color: #dc3545;
+    background: rgba(220, 53, 69, 0.05);
+}
+
+.question-status {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.status-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.status-icon.correct {
+    background: #28a745;
+    color: white;
+}
+
+.status-icon.incorrect {
+    background: #dc3545;
+    color: white;
+}
+
+.question-text {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.answer-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.answer-box {
+    padding: 1rem;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+}
+
+.answer-box.your-answer.correct {
+    background: rgba(40, 167, 69, 0.1);
+    border-color: #28a745;
+}
+
+.answer-box.your-answer.incorrect {
+    background: rgba(220, 53, 69, 0.1);
+    border-color: #dc3545;
+}
+
+.answer-box.correct-answer {
+    background: rgba(40, 167, 69, 0.1);
+    border-color: #28a745;
+}
+
+.answer-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.answer-text {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.explanation-box {
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    border-radius: 0 12px 12px 0;
+    padding: 1rem 1.5rem;
+}
+
+.explanation-label {
+    font-weight: 600;
+    color: #007bff;
+    margin-bottom: 0.5rem;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@media (max-width: 768px) {
+    .results-title {
+        font-size: 2rem;
+    }
+    
+    .score-number {
+        font-size: 2.5rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    
+    .answer-comparison {
+        grid-template-columns: 1fr;
+    }
+    
+    .step-indicator {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .step-line {
+        width: 2px;
+        height: 30px;
+        margin: 10px 0;
+    }
+    
+    .results-header {
+        padding: 2rem 1rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get results from sessionStorage
+    const resultsData = JSON.parse(sessionStorage.getItem('quizResults'));
+    
+    if (!resultsData) {
+        // Redirect to quiz setup if no results found
+        window.location.href = "{{ url_for('quiz_setup') }}";
+        return;
+    }
+    
+    displayResults(resultsData);
+    
+    // Event listeners
+    document.getElementById('reviewBtn').addEventListener('click', () => toggleDetailedReview());
+});
+
+function displayResults(results) {
+    const { score, total, percentage, answers, questions } = results;
+    
+    // Determine performance level
+    let performanceLevel = 'needs-improvement';
+    let performanceIcon = 'fa-redo';
+    let performanceTitle = 'Keep Practicing!';
+    let performanceMessage = 'Don\'t worry, practice makes perfect. Review the explanations and try again.';
+    
+    if (percentage >= 80) {
+        performanceLevel = 'excellent';
+        performanceIcon = 'fa-trophy';
+        performanceTitle = 'Excellent Work!';
+        performanceMessage = 'Outstanding performance! You have a strong understanding of this topic.';
+    } else if (percentage >= 60) {
+        performanceLevel = 'good';
+        performanceIcon = 'fa-thumbs-up';
+        performanceTitle = 'Good Job!';
+        performanceMessage = 'You\'re doing well! Review the areas you missed to improve further.';
+    }
+    
+    // Create results summary HTML
+    const summaryHTML = `
+        <div class="results-card">
+            <div class="results-header ${performanceLevel}">
+                <div class="results-icon">
+                    <i class="fas ${performanceIcon}"></i>
+                </div>
+                <h1 class="results-title">${performanceTitle}</h1>
+                <p class="results-subtitle">${performanceMessage}</p>
+                <div class="score-display">
+                    <div class="score-number">${score}/${total}</div>
+                    <div class="score-text">${percentage}% Correct</div>
+                </div>
+            </div>
+            
+            <div class="results-body">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon correct">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="stat-value">${score}</div>
+                        <div class="stat-label">Correct Answers</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon incorrect">
+                            <i class="fas fa-times"></i>
+                        </div>
+                        <div class="stat-value">${total - score}</div>
+                        <div class="stat-label">Incorrect Answers</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon accuracy">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="stat-value">${percentage}%</div>
+                        <div class="stat-label">Accuracy</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon time">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-value">${total}</div>
+                        <div class="stat-label">Questions</div>
+                    </div>
+                </div>
+                
+                <div class="performance-message">
+                    <h4>Performance Analysis</h4>
+                    <p class="mb-0">${getPerformanceAnalysis(percentage)}</p>
+                    ${getStudyTips(percentage)}
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('resultsSummary').innerHTML = summaryHTML;
+    
+    // Create detailed review HTML
+    createDetailedReview(answers, questions);
+}
+
+function getPerformanceAnalysis(percentage) {
+    if (percentage >= 90) {
+        return "Exceptional! You've mastered this topic and demonstrate excellent understanding.";
+    } else if (percentage >= 80) {
+        return "Great work! You have a solid grasp of the material with room for minor improvements.";
+    } else if (percentage >= 70) {
+        return "Good progress! You understand most concepts but could benefit from additional practice.";
+    } else if (percentage >= 60) {
+        return "You're on the right track! Focus on the areas you missed to strengthen your knowledge.";
+    } else {
+        return "This topic needs more attention. Don't get discouraged - review the material and try again!";
+    }
+}
+
+function getStudyTips(percentage) {
+    let tips = [];
+    
+    if (percentage < 70) {
+        tips = [
+            "Review the explanations for questions you missed",
+            "Practice similar problems to reinforce concepts",
+            "Take notes on key points from the explanations",
+            "Try the quiz again after studying"
+        ];
+    } else if (percentage < 85) {
+        tips = [
+            "Focus on the specific areas where you made mistakes",
+            "Look for patterns in the questions you missed",
+            "Practice advanced problems in this topic"
+        ];
+    } else {
+        tips = [
+            "Challenge yourself with more advanced topics",
+            "Help others learn this material",
+            "Explore related concepts to deepen understanding"
+        ];
+    }
+    
+    return `
+        <div class="performance-tips">
+            <h6><i class="fas fa-lightbulb me-2"></i>Study Tips:</h6>
+            <ul>
+                ${tips.map(tip => `<li>${tip}</li>`).join('')}
+            </ul>
+        </div>
+    `;
+}
+
+function createDetailedReview(answers, questions) {
+    let reviewHTML = `
+        <div class="review-card">
+            <div class="review-header">
+                <h4 class="mb-0"><i class="fas fa-list me-2"></i>Detailed Answer Review</h4>
+                <button class="btn btn-outline-light" onclick="toggleDetailedReview()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="review-content">
+    `;
+    
+    answers.forEach((answer, index) => {
+        const question = questions[index];
+        const isCorrect = answer.isCorrect;
+        
+        reviewHTML += `
+            <div class="question-review ${isCorrect ? 'correct' : 'incorrect'}">
+                <div class="question-status">
+                    <div class="status-icon ${isCorrect ? 'correct' : 'incorrect'}">
+                        <i class="fas fa-${isCorrect ? 'check' : 'times'}"></i>
+                    </div>
+                    <h6 class="mb-0">Question ${index + 1}: ${isCorrect ? 'Correct' : 'Incorrect'}</h6>
+                </div>
+                
+                <div class="question-text">${question.question}</div>
+                
+                <div class="answer-comparison">
+                    <div class="answer-box your-answer ${isCorrect ? 'correct' : 'incorrect'}">
+                        <div class="answer-label">Your Answer:</div>
+                        <div class="answer-text">
+                            ${answer.selected ? 
+                                `${answer.selected}) ${question.options.find(opt => opt.label === answer.selected)?.text || 'No answer'}` : 
+                                'No answer (time expired)'
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="answer-box correct-answer">
+                        <div class="answer-label">Correct Answer:</div>
+                        <div class="answer-text">
+                            ${answer.correct}) ${question.options.find(opt => opt.label === answer.correct)?.text}
+                        </div>
+                    </div>
+                </div>
+                
+                ${question.explanation ? `
+                    <div class="explanation-box">
+                        <div class="explanation-label">Explanation:</div>
+                        <div>${question.explanation}</div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+    
+    reviewHTML += `
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('detailedReview').innerHTML = reviewHTML;
+}
+
+function toggleDetailedReview() {
+    const reviewSection = document.getElementById('detailedReview');
+    const reviewBtn = document.getElementById('reviewBtn');
+    
+    if (reviewSection.style.display === 'none') {
+        reviewSection.style.display = 'block';
+        reviewBtn.innerHTML = '<i class="fas fa-eye-slash me-2"></i>Hide Review';
+        reviewSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        reviewSection.style.display = 'none';
+        reviewBtn.innerHTML = '<i class="fas fa-list me-2"></i>Review Answers';
+    }
+}
+</script>
+{% endblock %}

@@ -162,6 +162,67 @@ Make sure each question tests understanding of key concepts. Keep explanations b
     except Exception as e:
         return f"I apologize, but I'm having trouble generating a response right now. Please try again later. Error: {str(e)}"
 
+def generate_quiz_questions(subject, topic, difficulty='intermediate', question_count=5):
+    """Generate quiz questions using AI"""
+    try:
+        prompt = f"""Create an interactive quiz about {topic} in {subject} at {difficulty} level.
+
+Create exactly {question_count} multiple-choice questions in this EXACT format:
+
+Q1: [Question text here]
+A) [Option A]
+B) [Option B] 
+C) [Option C]
+D) [Option D]
+Correct Answer: [A/B/C/D]
+Explanation: [Brief explanation of why this is correct]
+
+Q2: [Question text here]
+A) [Option A]
+B) [Option B]
+C) [Option C] 
+D) [Option D]
+Correct Answer: [A/B/C/D]
+Explanation: [Brief explanation of why this is correct]
+
+[Continue for all {question_count} questions...]
+
+Make sure each question tests understanding of key concepts related to {topic}. 
+Difficulty level: {difficulty}
+Keep explanations brief but informative.
+"""
+        
+        response = model.generate_content(prompt)
+        return parse_quiz_response(response.text)
+        
+    except Exception as e:
+        print(f"Error generating quiz: {str(e)}")
+        return []
+
+def parse_quiz_response(response):
+    """Parse AI response into structured quiz data"""
+    quiz = []
+    regex = r'Q(\d+):\s*(.*?)\nA\)\s*(.*?)\nB\)\s*(.*?)\nC\)\s*(.*?)\nD\)\s*(.*?)\nCorrect Answer:\s*([A-D])\nExplanation:\s*(.*?)(?=\n\nQ\d+:|$)'
+    
+    import re
+    matches = re.finditer(regex, response, re.DOTALL)
+    
+    for match in matches:
+        quiz.append({
+            'questionNumber': int(match.group(1)),
+            'question': match.group(2).strip(),
+            'options': [
+                {'label': 'A', 'text': match.group(3).strip()},
+                {'label': 'B', 'text': match.group(4).strip()},
+                {'label': 'C', 'text': match.group(5).strip()},
+                {'label': 'D', 'text': match.group(6).strip()}
+            ],
+            'answer': match.group(7).strip(),
+            'explanation': match.group(8).strip()
+        })
+    
+    return quiz
+
 # Configure file uploads
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'static', 'uploads')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -399,6 +460,64 @@ def ai_chat():
         except:
             pass
 
+# Quiz Routes
+@app.route('/quiz/setup')
+def quiz_setup():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('quiz_setup.html')
+
+@app.route('/quiz/generate', methods=['POST'])
+def quiz_generate():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    # Get form data
+    subject = request.form.get('subject')
+    topic = request.form.get('topic')
+    difficulty = request.form.get('difficulty', 'intermediate')
+    question_count = int(request.form.get('questionCount', 5))
+    time_limit = int(request.form.get('timeLimit', 30))
+    
+    # Store quiz data in session
+    quiz_data = {
+        'subject': subject,
+        'topic': topic,
+        'difficulty': difficulty,
+        'question_count': question_count,
+        'time_limit': time_limit
+    }
+    session['quiz_data'] = quiz_data
+    
+    # Generate questions
+    questions = generate_quiz_questions(subject, topic, difficulty, question_count)
+    session['quiz_questions'] = questions
+    
+    return render_template('quiz_loading.html', quiz_data=quiz_data)
+
+@app.route('/quiz/take')
+def quiz_take():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    quiz_data = session.get('quiz_data')
+    quiz_questions = session.get('quiz_questions')
+    
+    if not quiz_data or not quiz_questions:
+        flash('No quiz data found. Please create a new quiz.', 'error')
+        return redirect(url_for('quiz_setup'))
+    
+    return render_template('quiz_take.html', 
+                         quiz_data=quiz_data, 
+                         quiz_questions=quiz_questions)
+
+@app.route('/quiz/results')
+def quiz_results():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    return render_template('quiz_results.html')
+
 @app.route('/profile')
 def profile():
     if 'user_id' not in session:
@@ -582,18 +701,7 @@ def chat_practice():
 def chat_quiz():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute('''
-        SELECT * FROM ai_conversations 
-        WHERE user_id = %s 
-        ORDER BY created_at DESC 
-        LIMIT 10
-    ''', (session['user_id'],))
-    recent_conversations = cur.fetchall()
-    cur.close()
-    conn.close()
-    return render_template('chat_quiz.html', conversations=recent_conversations)
+    return redirect(url_for('quiz_setup'))
 
 @app.route('/chat/study-notes')
 def chat_study_notes():
@@ -675,6 +783,11 @@ def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('dashboard.html')
+
+# Add JSON filter for templates
+@app.template_filter('tojsonfilter')
+def to_json_filter(obj):
+    return json.dumps(obj)
 
 if __name__ == '__main__':
     init_db()

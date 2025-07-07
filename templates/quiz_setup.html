@@ -1,0 +1,489 @@
+{% extends "base.html" %}
+
+{% block title %}Create Quiz - AI Tutor{% endblock %}
+
+{% block content %}
+<div class="quiz-setup-page">
+    <!-- Header -->
+    <div class="quiz-header bg-gradient-primary text-white">
+        <div class="container py-4">
+            <div class="row align-items-center">
+                <div class="col">
+                    <div class="d-flex align-items-center">
+                        <div class="quiz-icon me-3">
+                            <i class="fas fa-brain fs-1"></i>
+                        </div>
+                        <div>
+                            <h1 class="h2 mb-1">Interactive Quiz Creator</h1>
+                            <p class="mb-0 opacity-75">Test your knowledge with AI-generated questions</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-6">
+                <!-- Progress Steps -->
+                <div class="quiz-steps mb-5">
+                    <div class="step-indicator">
+                        <div class="step active">
+                            <div class="step-number">1</div>
+                            <div class="step-label">Setup</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-label">Generate</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-label">Take Quiz</div>
+                        </div>
+                        <div class="step-line"></div>
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-label">Results</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Setup Form -->
+                <div class="quiz-setup-card">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-body p-5">
+                            <div class="text-center mb-4">
+                                <div class="setup-icon mb-3">
+                                    <i class="fas fa-cog text-primary"></i>
+                                </div>
+                                <h3 class="card-title">Customize Your Quiz</h3>
+                                <p class="text-muted">Choose your preferences to create the perfect quiz</p>
+                            </div>
+
+                            <form id="quizSetupForm" action="{{ url_for('quiz_generate') }}" method="POST">
+                                <div class="row g-4">
+                                    <div class="col-12">
+                                        <label for="subject" class="form-label fw-bold">
+                                            <i class="fas fa-book me-2 text-primary"></i>Subject
+                                        </label>
+                                        <select class="form-select form-select-lg" id="subject" name="subject" required>
+                                            <option value="">Choose your subject...</option>
+                                            <option value="Mathematics">📊 Mathematics</option>
+                                            <option value="Physics">⚛️ Physics</option>
+                                            <option value="Chemistry">🧪 Chemistry</option>
+                                            <option value="Biology">🧬 Biology</option>
+                                            <option value="English">📚 English Literature</option>
+                                            <option value="History">🏛️ History</option>
+                                            <option value="Programming">💻 Programming</option>
+                                            <option value="Science">🔬 General Science</option>
+                                            <option value="Geography">🌍 Geography</option>
+                                            <option value="Economics">💰 Economics</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="topic" class="form-label fw-bold">
+                                            <i class="fas fa-lightbulb me-2 text-warning"></i>Topic or Concept
+                                        </label>
+                                        <input type="text" class="form-control form-control-lg" id="topic" name="topic" 
+                                               placeholder="e.g., Photosynthesis, Quadratic Equations, World War II..." required>
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Be specific for better, more targeted questions
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="difficulty" class="form-label fw-bold">
+                                            <i class="fas fa-chart-line me-2 text-success"></i>Difficulty Level
+                                        </label>
+                                        <select class="form-select form-select-lg" id="difficulty" name="difficulty">
+                                            <option value="beginner">🟢 Beginner</option>
+                                            <option value="intermediate" selected>🟡 Intermediate</option>
+                                            <option value="advanced">🔴 Advanced</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="questionCount" class="form-label fw-bold">
+                                            <i class="fas fa-list-ol me-2 text-info"></i>Number of Questions
+                                        </label>
+                                        <select class="form-select form-select-lg" id="questionCount" name="questionCount">
+                                            <option value="5" selected>5 Questions</option>
+                                            <option value="10">10 Questions</option>
+                                            <option value="15">15 Questions</option>
+                                            <option value="20">20 Questions</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="timeLimit" class="form-label fw-bold">
+                                            <i class="fas fa-clock me-2 text-danger"></i>Time per Question
+                                        </label>
+                                        <div class="time-options">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="timeLimit" id="time30" value="30" checked>
+                                                <label class="form-check-label" for="time30">30 seconds</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="timeLimit" id="time60" value="60">
+                                                <label class="form-check-label" for="time60">1 minute</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="timeLimit" id="time90" value="90">
+                                                <label class="form-check-label" for="time90">1.5 minutes</label>
+                                            </div>
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="timeLimit" id="timeUnlimited" value="0">
+                                                <label class="form-check-label" for="timeUnlimited">No limit</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-center mt-5">
+                                    <button type="submit" class="btn btn-primary btn-lg px-5" id="generateBtn">
+                                        <i class="fas fa-magic me-2"></i>Generate My Quiz
+                                        <div class="spinner-border spinner-border-sm ms-2 d-none" id="loadingSpinner"></div>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Popular Topics -->
+                <div class="popular-topics mt-5">
+                    <h5 class="text-center mb-4">Popular Quiz Topics</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="topic-card" data-subject="Mathematics" data-topic="Algebra Basics">
+                                <i class="fas fa-calculator"></i>
+                                <span>Algebra Basics</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="topic-card" data-subject="Biology" data-topic="Cell Structure">
+                                <i class="fas fa-microscope"></i>
+                                <span>Cell Structure</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="topic-card" data-subject="History" data-topic="World War II">
+                                <i class="fas fa-landmark"></i>
+                                <span>World War II</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="topic-card" data-subject="Chemistry" data-topic="Periodic Table">
+                                <i class="fas fa-atom"></i>
+                                <span>Periodic Table</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="topic-card" data-subject="Physics" data-topic="Newton's Laws">
+                                <i class="fas fa-apple-alt"></i>
+                                <span>Newton's Laws</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="topic-card" data-subject="Programming" data-topic="Python Basics">
+                                <i class="fab fa-python"></i>
+                                <span>Python Basics</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.quiz-setup-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.quiz-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quiz-steps {
+    display: flex;
+    justify-content: center;
+}
+
+.step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.step.active .step-number {
+    background: #007bff;
+    color: white;
+    transform: scale(1.1);
+}
+
+.step-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.step.active .step-label {
+    color: #007bff;
+    font-weight: 600;
+}
+
+.step-line {
+    width: 60px;
+    height: 2px;
+    background: #e9ecef;
+    margin: 0 10px;
+    margin-bottom: 32px;
+}
+
+.setup-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 2rem;
+    color: white;
+}
+
+.quiz-setup-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-select-lg, .form-control-lg {
+    padding: 1rem 1.25rem;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-select-lg:focus, .form-control-lg:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.time-options {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 50px;
+    padding: 15px 40px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.popular-topics {
+    animation: fadeIn 0.8s ease-out 0.3s both;
+}
+
+.topic-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.topic-card:hover {
+    transform: translateY(-5px);
+    border-color: #007bff;
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.2);
+}
+
+.topic-card i {
+    font-size: 1.5rem;
+    color: #007bff;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.topic-card span {
+    font-weight: 500;
+    color: #495057;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+    .step-indicator {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .step-line {
+        width: 2px;
+        height: 30px;
+        margin: 10px 0;
+    }
+    
+    .time-options {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .quiz-icon {
+        width: 50px;
+        height: 50px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus on topic input when subject is selected
+    document.getElementById('subject').addEventListener('change', function() {
+        if (this.value) {
+            document.getElementById('topic').focus();
+        }
+    });
+
+    // Popular topic cards
+    document.querySelectorAll('.topic-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const subject = this.dataset.subject;
+            const topic = this.dataset.topic;
+            
+            document.getElementById('subject').value = subject;
+            document.getElementById('topic').value = topic;
+            
+            // Smooth scroll to form
+            document.getElementById('topic').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+            
+            // Highlight the form briefly
+            const form = document.querySelector('.quiz-setup-card');
+            form.style.transform = 'scale(1.02)';
+            form.style.transition = 'transform 0.3s ease';
+            setTimeout(() => {
+                form.style.transform = 'scale(1)';
+            }, 300);
+        });
+    });
+
+    // Form submission with loading state
+    document.getElementById('quizSetupForm').addEventListener('submit', function() {
+        const btn = document.getElementById('generateBtn');
+        const spinner = document.getElementById('loadingSpinner');
+        
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+        btn.innerHTML = '<i class="fas fa-magic me-2"></i>Generating Quiz...<div class="spinner-border spinner-border-sm ms-2"></div>';
+    });
+
+    // Form validation
+    const form = document.getElementById('quizSetupForm');
+    const inputs = form.querySelectorAll('input[required], select[required]');
+    
+    function validateForm() {
+        const btn = document.getElementById('generateBtn');
+        let isValid = true;
+        
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                isValid = false;
+            }
+        });
+        
+        btn.disabled = !isValid;
+    }
+    
+    inputs.forEach(input => {
+        input.addEventListener('input', validateForm);
+        input.addEventListener('change', validateForm);
+    });
+    
+    // Initial validation
+    validateForm();
+});
+</script>
+{% endblock %}

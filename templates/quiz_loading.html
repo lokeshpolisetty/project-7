@@ -1,0 +1,452 @@
+{% extends "base.html" %}
+
+{% block title %}Generating Quiz - AI Tutor{% endblock %}
+
+{% block content %}
+<div class="quiz-loading-page">
+    <div class="container-fluid h-100">
+        <div class="row h-100 align-items-center justify-content-center">
+            <div class="col-lg-6 col-xl-5">
+                <div class="loading-card text-center">
+                    <!-- Progress Steps -->
+                    <div class="quiz-steps mb-5">
+                        <div class="step-indicator">
+                            <div class="step completed">
+                                <div class="step-number"><i class="fas fa-check"></i></div>
+                                <div class="step-label">Setup</div>
+                            </div>
+                            <div class="step-line completed"></div>
+                            <div class="step active">
+                                <div class="step-number">
+                                    <div class="spinner-border spinner-border-sm"></div>
+                                </div>
+                                <div class="step-label">Generate</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step">
+                                <div class="step-number">3</div>
+                                <div class="step-label">Take Quiz</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step">
+                                <div class="step-number">4</div>
+                                <div class="step-label">Results</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loading Animation -->
+                    <div class="loading-animation mb-4">
+                        <div class="brain-icon">
+                            <i class="fas fa-brain"></i>
+                            <div class="pulse-ring"></div>
+                            <div class="pulse-ring delay-1"></div>
+                            <div class="pulse-ring delay-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Loading Text -->
+                    <div class="loading-content">
+                        <h2 class="loading-title mb-3">Creating Your Quiz</h2>
+                        <p class="loading-subtitle text-muted mb-4">Our AI is crafting personalized questions just for you</p>
+                        
+                        <!-- Progress Bar -->
+                        <div class="progress-container mb-4">
+                            <div class="progress">
+                                <div class="progress-bar" id="progressBar"></div>
+                            </div>
+                            <div class="progress-text" id="progressText">0%</div>
+                        </div>
+
+                        <!-- Loading Messages -->
+                        <div class="loading-messages">
+                            <div class="message active" id="message1">
+                                <i class="fas fa-search me-2"></i>Analyzing your topic...
+                            </div>
+                            <div class="message" id="message2">
+                                <i class="fas fa-lightbulb me-2"></i>Generating questions...
+                            </div>
+                            <div class="message" id="message3">
+                                <i class="fas fa-check-circle me-2"></i>Preparing your quiz...
+                            </div>
+                        </div>
+
+                        <!-- Quiz Details -->
+                        <div class="quiz-details mt-4">
+                            <div class="detail-card">
+                                <div class="row g-3">
+                                    <div class="col-6">
+                                        <div class="detail-item">
+                                            <i class="fas fa-book text-primary"></i>
+                                            <div class="detail-label">Subject</div>
+                                            <div class="detail-value">{{ quiz_data.subject }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="detail-item">
+                                            <i class="fas fa-lightbulb text-warning"></i>
+                                            <div class="detail-label">Topic</div>
+                                            <div class="detail-value">{{ quiz_data.topic }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="detail-item">
+                                            <i class="fas fa-chart-line text-success"></i>
+                                            <div class="detail-label">Difficulty</div>
+                                            <div class="detail-value">{{ quiz_data.difficulty|title }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="detail-item">
+                                            <i class="fas fa-list-ol text-info"></i>
+                                            <div class="detail-label">Questions</div>
+                                            <div class="detail-value">{{ quiz_data.question_count }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.quiz-loading-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-card {
+    background: white;
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    max-width: 600px;
+    animation: slideInUp 0.8s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Progress Steps */
+.quiz-steps {
+    display: flex;
+    justify-content: center;
+}
+
+.step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.step.completed .step-number {
+    background: #28a745;
+    color: white;
+}
+
+.step.active .step-number {
+    background: #007bff;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.step-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.step.completed .step-label,
+.step.active .step-label {
+    color: #007bff;
+    font-weight: 600;
+}
+
+.step-line {
+    width: 60px;
+    height: 2px;
+    background: #e9ecef;
+    margin: 0 10px;
+    margin-bottom: 32px;
+}
+
+.step-line.completed {
+    background: #28a745;
+}
+
+/* Loading Animation */
+.loading-animation {
+    position: relative;
+    display: inline-block;
+}
+
+.brain-icon {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: white;
+    margin: 0 auto;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.pulse-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px;
+    height: 120px;
+    border: 3px solid rgba(102, 126, 234, 0.3);
+    border-radius: 50%;
+    animation: pulsate 2s ease-out infinite;
+}
+
+.pulse-ring.delay-1 {
+    animation-delay: 0.5s;
+}
+
+.pulse-ring.delay-2 {
+    animation-delay: 1s;
+}
+
+@keyframes pulsate {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+/* Loading Content */
+.loading-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.loading-subtitle {
+    font-size: 1.1rem;
+}
+
+/* Progress Bar */
+.progress-container {
+    position: relative;
+    margin: 0 auto;
+    max-width: 300px;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 10px;
+    background: #e9ecef;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: 200px 0; }
+}
+
+.progress-text {
+    position: absolute;
+    top: -30px;
+    right: 0;
+    font-weight: 600;
+    color: #007bff;
+}
+
+/* Loading Messages */
+.loading-messages {
+    margin: 2rem 0;
+}
+
+.message {
+    opacity: 0.3;
+    transition: all 0.5s ease;
+    padding: 0.5rem 0;
+    font-weight: 500;
+}
+
+.message.active {
+    opacity: 1;
+    color: #007bff;
+    transform: scale(1.05);
+}
+
+/* Quiz Details */
+.detail-card {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.detail-item {
+    text-align: center;
+    padding: 1rem;
+}
+
+.detail-item i {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.detail-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.detail-value {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@media (max-width: 768px) {
+    .loading-card {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+    }
+    
+    .brain-icon {
+        width: 100px;
+        height: 100px;
+        font-size: 2.5rem;
+    }
+    
+    .pulse-ring {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .loading-title {
+        font-size: 1.5rem;
+    }
+    
+    .step-indicator {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .step-line {
+        width: 2px;
+        height: 30px;
+        margin: 10px 0;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let progress = 0;
+    let currentMessage = 1;
+    const totalMessages = 3;
+    
+    // Simulate progress
+    const progressInterval = setInterval(() => {
+        progress += Math.random() * 15 + 5; // Random increment between 5-20
+        
+        if (progress >= 100) {
+            progress = 100;
+            clearInterval(progressInterval);
+            
+            // Redirect to quiz page after completion
+            setTimeout(() => {
+                window.location.href = "{{ url_for('quiz_take') }}";
+            }, 1000);
+        }
+        
+        document.getElementById('progressBar').style.width = progress + '%';
+        document.getElementById('progressText').textContent = Math.round(progress) + '%';
+        
+        // Update messages based on progress
+        if (progress > 30 && currentMessage === 1) {
+            updateMessage(2);
+        } else if (progress > 70 && currentMessage === 2) {
+            updateMessage(3);
+        }
+    }, 800);
+    
+    function updateMessage(messageNumber) {
+        // Hide current message
+        document.getElementById('message' + currentMessage).classList.remove('active');
+        
+        // Show new message
+        currentMessage = messageNumber;
+        document.getElementById('message' + currentMessage).classList.add('active');
+    }
+    
+    // Auto-redirect after 10 seconds as fallback
+    setTimeout(() => {
+        if (progress < 100) {
+            window.location.href = "{{ url_for('quiz_take') }}";
+        }
+    }, 10000);
+});
+</script>
+{% endblock %}
