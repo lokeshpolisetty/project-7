@@ -114,27 +114,29 @@ Do NOT include the full solution or step-by-step working. Only provide the quest
 """
             
         elif conversation_type == 'quiz':
-            prompt = f"""Create a quiz of 10 questions about {subject or 'the topic'}: {question}
+            prompt = f"""Create an interactive quiz about {subject or 'the topic'}: {question}
 
-Create a multiple-choice quiz with the following features:
+Create exactly 5 multiple-choice questions in this EXACT format:
 
-Display one question at a time, with 4 options (A, B, C, D).
+Q1: [Question text here]
+A) [Option A]
+B) [Option B] 
+C) [Option C]
+D) [Option D]
+Correct Answer: [A/B/C/D]
+Explanation: [Brief explanation of why this is correct]
 
-Allow the user to select an option by clicking or typing A/B/C/D.
+Q2: [Question text here]
+A) [Option A]
+B) [Option B]
+C) [Option C] 
+D) [Option D]
+Correct Answer: [A/B/C/D]
+Explanation: [Brief explanation of why this is correct]
 
-After selection:
+[Continue for Q3, Q4, Q5...]
 
-Immediately indicate whether the selected answer is correct or wrong.
-
-Show the correct answer if the user was wrong.
-
-Provide a ‘Next’ button to move to the next question.
-
-After all questions are answered, show a final score (e.g., 4 out of 5 correct).
-
-Use a clean and simple interface, either text-based (for console or chatbot) or HTML-based (for web).
-
-Questions should be auto-generated or picked randomly from a given topic like “General Knowledge”, “Python Basics”, or a custom topic provided by the user.
+Make sure each question tests understanding of key concepts. Keep explanations brief but informative.
 """
             
         elif conversation_type == 'study_notes':
@@ -207,7 +209,7 @@ def register():
         name = request.form['name']
         email = request.form['email']
         password = request.form['password']
-        role = request.form['role']
+        role = request.form.get('role', 'student')
         
         conn = get_db_connection()
         cur = conn.cursor()
@@ -381,7 +383,8 @@ def ai_chat():
         return jsonify({
             'response': response,
             'id': result['id'],
-            'timestamp': result['created_at'].isoformat()
+            'timestamp': result['created_at'].isoformat(),
+            'type': conversation_type
         })
         
     except Exception as e:
