@@ -1,17 +1,736 @@
-{% extends "chat.html" %}
+{% extends "base.html" %}
+
 {% block title %}AI Tutor - Interactive Quiz{% endblock %}
+
 {% block content %}
-{{ super() }}
+<div class="container-fluid h-100">
+    <div class="row h-100">
+        <!-- Main Quiz Area -->
+        <div class="col-12 p-0">
+            <div class="quiz-container-full h-100 d-flex flex-column">
+                <!-- Quiz Header -->
+                <div class="quiz-header-full bg-gradient-primary text-white p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-white bg-opacity-20 rounded-circle p-3 me-3">
+                                <i class="fas fa-question-circle fs-3"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0">Interactive Quiz Mode</h3>
+                                <p class="mb-0 opacity-75">Test your knowledge with AI-generated quizzes</p>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light">
+                                <i class="fas fa-home me-2"></i>Dashboard
+                            </a>
+                            <button class="btn btn-light" id="newQuizBtn">
+                                <i class="fas fa-plus me-2"></i>New Quiz
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quiz Content Area -->
+                <div class="quiz-content flex-grow-1 overflow-auto" id="quizContent">
+                    <!-- Quiz Setup Form -->
+                    <div class="quiz-setup-container" id="quizSetup">
+                        <div class="container py-5">
+                            <div class="row justify-content-center">
+                                <div class="col-md-8 col-lg-6">
+                                    <div class="card border-0 shadow-lg">
+                                        <div class="card-body p-5">
+                                            <div class="text-center mb-4">
+                                                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                                    <i class="fas fa-brain text-primary fs-1"></i>
+                                                </div>
+                                                <h4>Create Your Quiz</h4>
+                                                <p class="text-muted">Choose a topic and let AI generate a personalized quiz for you</p>
+                                            </div>
+                                            
+                                            <form id="quizSetupForm">
+                                                <div class="mb-4">
+                                                    <label for="quizSubject" class="form-label fw-bold">Subject</label>
+                                                    <select class="form-select form-select-lg" id="quizSubject" required>
+                                                        <option value="">Choose a subject...</option>
+                                                        <option value="Mathematics">Mathematics</option>
+                                                        <option value="Physics">Physics</option>
+                                                        <option value="Chemistry">Chemistry</option>
+                                                        <option value="Biology">Biology</option>
+                                                        <option value="English">English</option>
+                                                        <option value="History">History</option>
+                                                        <option value="Programming">Programming</option>
+                                                        <option value="Science">Science (General)</option>
+                                                        <option value="Geography">Geography</option>
+                                                        <option value="Economics">Economics</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <div class="mb-4">
+                                                    <label for="quizTopic" class="form-label fw-bold">Topic or Concept</label>
+                                                    <input type="text" class="form-control form-control-lg" id="quizTopic" 
+                                                           placeholder="e.g., Photosynthesis, Algebra, World War II..." required>
+                                                    <div class="form-text">Be specific for better quiz questions</div>
+                                                </div>
+                                                
+                                                <div class="mb-4">
+                                                    <label for="quizDifficulty" class="form-label fw-bold">Difficulty Level</label>
+                                                    <select class="form-select form-select-lg" id="quizDifficulty">
+                                                        <option value="beginner">Beginner</option>
+                                                        <option value="intermediate" selected>Intermediate</option>
+                                                        <option value="advanced">Advanced</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <button type="submit" class="btn btn-primary btn-lg w-100" id="generateQuizBtn">
+                                                    <i class="fas fa-magic me-2"></i>Generate Quiz
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5>Generating Your Quiz...</h5>
+                <p class="text-muted mb-0">AI is creating personalized questions for you</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.quiz-container-full {
+    height: calc(100vh - 76px);
+}
+
+.quiz-content {
+    background-color: #f8f9fa;
+}
+
+.quiz-setup-container {
+    min-height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* Quiz Styles */
+.quiz-interface {
+    background: white;
+    border-radius: 12px;
+    margin: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.quiz-question-container {
+    padding: 30px;
+}
+
+.quiz-question-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 20px 30px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.quiz-progress-bar {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.quiz-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #007bff, #0056b3);
+    transition: width 0.3s ease;
+}
+
+.quiz-timer {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 10px 15px;
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.quiz-timer.warning {
+    background: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+    animation: pulse 1s infinite;
+}
+
+.quiz-question-text {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.quiz-options {
+    display: grid;
+    gap: 12px;
+}
+
+.quiz-option {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    font-size: 1rem;
+}
+
+.quiz-option:hover {
+    border-color: #007bff;
+    background-color: #f8f9ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+}
+
+.quiz-option.selected {
+    border-color: #007bff;
+    background-color: #e7f3ff;
+}
+
+.quiz-option.correct {
+    border-color: #28a745;
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.quiz-option.incorrect {
+    border-color: #dc3545;
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.quiz-option.disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.quiz-feedback {
+    background: #e7f3ff;
+    border: 1px solid #b3d7ff;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.quiz-feedback.correct {
+    background: #d4edda;
+    border-color: #c3e6cb;
+}
+
+.quiz-feedback.incorrect {
+    background: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.quiz-summary {
+    text-align: center;
+    padding: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    margin: 20px;
+    border-radius: 12px;
+}
+
+.quiz-score {
+    font-size: 3rem;
+    font-weight: bold;
+    margin: 20px 0;
+}
+
+.quiz-score.excellent { color: #28a745; }
+.quiz-score.good { color: #ffc107; }
+.quiz-score.needs-improvement { color: #dc3545; }
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@media (max-width: 768px) {
+    .quiz-question-container {
+        padding: 20px;
+    }
+    
+    .quiz-question-header {
+        padding: 15px 20px;
+    }
+    
+    .quiz-option {
+        padding: 12px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .quiz-score {
+        font-size: 2rem;
+    }
+}
+</style>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Force quiz mode on load
-    if (window.ChatInterface) {
-        ChatInterface.prototype.currentConversationType = 'quiz';
-        document.getElementById('questionInput').placeholder = 'What topic should I create a quiz about?';
-        document.querySelectorAll('.quick-action-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.action === 'quiz');
+class QuizMode {
+    constructor() {
+        this.currentQuiz = null;
+        this.currentQuestion = 0;
+        this.score = 0;
+        this.userAnswers = [];
+        this.timer = null;
+        this.timeLeft = 30;
+        
+        this.initializeEventListeners();
+        this.initializeModals();
+    }
+    
+    initializeEventListeners() {
+        // Quiz setup form
+        document.getElementById('quizSetupForm').addEventListener('submit', (e) => this.handleQuizSetup(e));
+        
+        // New quiz button
+        document.getElementById('newQuizBtn').addEventListener('click', () => this.resetToSetup());
+        
+        // Auto-focus on topic input when subject is selected
+        document.getElementById('quizSubject').addEventListener('change', () => {
+            document.getElementById('quizTopic').focus();
         });
     }
+    
+    initializeModals() {
+        this.loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    }
+    
+    async handleQuizSetup(e) {
+        e.preventDefault();
+        
+        const subject = document.getElementById('quizSubject').value;
+        const topic = document.getElementById('quizTopic').value.trim();
+        const difficulty = document.getElementById('quizDifficulty').value;
+        
+        if (!subject || !topic) {
+            this.showError('Please select a subject and enter a topic.');
+            return;
+        }
+        
+        try {
+            this.showLoading();
+            
+            const quizPrompt = `Create a quiz about ${topic} in ${subject} at ${difficulty} level`;
+            
+            const response = await fetch('/ai-chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    question: quizPrompt,
+                    subject: subject,
+                    type: 'quiz'
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Parse and start the quiz
+            const quizData = this.parseQuizResponse(data.response);
+            if (quizData.length > 0) {
+                this.startQuiz(quizData, subject, topic);
+            } else {
+                throw new Error('Failed to generate quiz questions. Please try again.');
+            }
+            
+        } catch (error) {
+            this.showError(error.message);
+            console.error('Error:', error);
+        } finally {
+            this.hideLoading();
+        }
+    }
+    
+    parseQuizResponse(response) {
+        const quiz = [];
+        const regex = /Q(\d+):\s*(.*?)\nA\)\s*(.*?)\nB\)\s*(.*?)\nC\)\s*(.*?)\nD\)\s*(.*?)\nCorrect Answer:\s*([A-D])\nExplanation:\s*(.*?)(?=\n\nQ\d+:|$)/gs;
+        let match;
+        
+        while ((match = regex.exec(response)) !== null) {
+            quiz.push({
+                questionNumber: parseInt(match[1]),
+                question: match[2].trim(),
+                options: [
+                    { label: "A", text: match[3].trim() },
+                    { label: "B", text: match[4].trim() },
+                    { label: "C", text: match[5].trim() },
+                    { label: "D", text: match[6].trim() }
+                ],
+                answer: match[7].trim(),
+                explanation: match[8].trim()
+            });
+        }
+        
+        return quiz;
+    }
+    
+    startQuiz(quizData, subject, topic) {
+        this.currentQuiz = quizData;
+        this.currentQuestion = 0;
+        this.score = 0;
+        this.userAnswers = [];
+        
+        // Hide setup form and show quiz
+        document.getElementById('quizSetup').style.display = 'none';
+        
+        this.showQuestion();
+    }
+    
+    showQuestion() {
+        if (this.currentQuestion >= this.currentQuiz.length) {
+            this.showSummary();
+            return;
+        }
+        
+        this.timeLeft = 30;
+        const question = this.currentQuiz[this.currentQuestion];
+        const progress = ((this.currentQuestion) / this.currentQuiz.length) * 100;
+        
+        const quizHTML = `
+            <div class="quiz-interface">
+                <div class="quiz-question-header">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Question ${this.currentQuestion + 1} of ${this.currentQuiz.length}</h5>
+                        <div class="quiz-timer" id="quizTimer">
+                            <i class="fas fa-clock me-2"></i><span id="timeLeft">${this.timeLeft}</span> seconds
+                        </div>
+                    </div>
+                    <div class="quiz-progress-bar">
+                        <div class="quiz-progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+                
+                <div class="quiz-question-container">
+                    <div class="quiz-question-text">${question.question}</div>
+                    
+                    <div class="quiz-options" id="quizOptions">
+                        ${question.options.map(option => `
+                            <div class="quiz-option" data-answer="${option.label}">
+                                <strong>${option.label})</strong> ${option.text}
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div id="quizFeedback" style="display: none;"></div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('quizContent').innerHTML = quizHTML;
+        
+        // Add click handlers to options
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', () => this.selectOption(option.dataset.answer));
+        });
+        
+        // Start timer
+        this.timer = setInterval(() => {
+            this.timeLeft--;
+            const timeLeftElement = document.getElementById('timeLeft');
+            if (timeLeftElement) {
+                timeLeftElement.textContent = this.timeLeft;
+                
+                const timerElement = document.getElementById('quizTimer');
+                if (this.timeLeft <= 10) {
+                    timerElement.classList.add('warning');
+                }
+            }
+            
+            if (this.timeLeft <= 0) {
+                clearInterval(this.timer);
+                this.selectOption(null);
+            }
+        }, 1000);
+    }
+    
+    selectOption(selectedAnswer) {
+        clearInterval(this.timer);
+        
+        const question = this.currentQuiz[this.currentQuestion];
+        const correctAnswer = question.answer;
+        const isCorrect = selectedAnswer === correctAnswer;
+        
+        if (isCorrect) {
+            this.score++;
+        }
+        
+        this.userAnswers.push({
+            question: this.currentQuestion + 1,
+            selected: selectedAnswer,
+            correct: correctAnswer,
+            isCorrect: isCorrect
+        });
+        
+        // Disable all options and show feedback
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.classList.add('disabled');
+            option.style.pointerEvents = 'none';
+            
+            if (option.dataset.answer === correctAnswer) {
+                option.classList.add('correct');
+            } else if (option.dataset.answer === selectedAnswer && !isCorrect) {
+                option.classList.add('incorrect');
+            }
+        });
+        
+        // Show feedback
+        this.showFeedback(selectedAnswer, question, isCorrect);
+    }
+    
+    showFeedback(selectedAnswer, question, isCorrect) {
+        const feedbackElement = document.getElementById('quizFeedback');
+        let feedbackHTML = '';
+        
+        if (selectedAnswer === null) {
+            feedbackHTML = `
+                <div class="quiz-feedback incorrect">
+                    <h6><i class="fas fa-clock me-2"></i>Time's Up!</h6>
+                    <p><strong>Correct Answer:</strong> ${question.answer}</p>
+                    <p><strong>Explanation:</strong> ${question.explanation}</p>
+                </div>
+            `;
+        } else if (isCorrect) {
+            feedbackHTML = `
+                <div class="quiz-feedback correct">
+                    <h6><i class="fas fa-check-circle me-2"></i>Correct!</h6>
+                    <p><strong>Explanation:</strong> ${question.explanation}</p>
+                </div>
+            `;
+        } else {
+            feedbackHTML = `
+                <div class="quiz-feedback incorrect">
+                    <h6><i class="fas fa-times-circle me-2"></i>Incorrect</h6>
+                    <p><strong>Correct Answer:</strong> ${question.answer}</p>
+                    <p><strong>Explanation:</strong> ${question.explanation}</p>
+                </div>
+            `;
+        }
+        
+        feedbackHTML += `
+            <button class="btn btn-primary btn-lg mt-3" id="nextQuestionBtn">
+                ${this.currentQuestion + 1 < this.currentQuiz.length ? 'Next Question' : 'View Results'}
+                <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+        `;
+        
+        feedbackElement.innerHTML = feedbackHTML;
+        feedbackElement.style.display = 'block';
+        
+        document.getElementById('nextQuestionBtn').addEventListener('click', () => {
+            this.currentQuestion++;
+            this.showQuestion();
+        });
+    }
+    
+    showSummary() {
+        const percentage = Math.round((this.score / this.currentQuiz.length) * 100);
+        let scoreClass = 'needs-improvement';
+        let message = 'Keep practicing!';
+        let icon = 'fa-redo';
+        
+        if (percentage >= 80) {
+            scoreClass = 'excellent';
+            message = 'Excellent work!';
+            icon = 'fa-trophy';
+        } else if (percentage >= 60) {
+            scoreClass = 'good';
+            message = 'Good job!';
+            icon = 'fa-thumbs-up';
+        }
+        
+        const summaryHTML = `
+            <div class="quiz-summary">
+                <div class="text-center">
+                    <i class="fas ${icon} fa-4x mb-4"></i>
+                    <h2>Quiz Complete!</h2>
+                    <div class="quiz-score ${scoreClass}">
+                        ${this.score} / ${this.currentQuiz.length}
+                    </div>
+                    <p class="lead">${percentage}% - ${message}</p>
+                    
+                    <div class="row g-3 mt-4 justify-content-center">
+                        <div class="col-6 col-md-3">
+                            <div class="bg-white bg-opacity-20 rounded p-3">
+                                <h6>Correct</h6>
+                                <div class="h3 text-success">${this.score}</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="bg-white bg-opacity-20 rounded p-3">
+                                <h6>Incorrect</h6>
+                                <div class="h3 text-danger">${this.currentQuiz.length - this.score}</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="bg-white bg-opacity-20 rounded p-3">
+                                <h6>Accuracy</h6>
+                                <div class="h3">${percentage}%</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-5 d-flex gap-3 justify-content-center flex-wrap">
+                        <button class="btn btn-light btn-lg" onclick="quizMode.resetToSetup()">
+                            <i class="fas fa-plus me-2"></i>New Quiz
+                        </button>
+                        <button class="btn btn-outline-light btn-lg" onclick="quizMode.showReview()">
+                            <i class="fas fa-list me-2"></i>Review Answers
+                        </button>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-home me-2"></i>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('quizContent').innerHTML = summaryHTML;
+    }
+    
+    showReview() {
+        let reviewHTML = `
+            <div class="quiz-interface">
+                <div class="quiz-question-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4><i class="fas fa-list text-primary me-2"></i>Answer Review</h4>
+                        <button class="btn btn-primary" onclick="quizMode.resetToSetup()">
+                            <i class="fas fa-plus me-2"></i>New Quiz
+                        </button>
+                    </div>
+                </div>
+                <div class="quiz-question-container">
+        `;
+        
+        this.userAnswers.forEach((answer, index) => {
+            const question = this.currentQuiz[index];
+            const statusIcon = answer.isCorrect ? 'fa-check-circle text-success' : 'fa-times-circle text-danger';
+            const statusText = answer.isCorrect ? 'Correct' : 'Incorrect';
+            
+            reviewHTML += `
+                <div class="mb-5 p-4 border rounded">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas ${statusIcon} me-2 fs-5"></i>
+                        <h6 class="mb-0">Question ${answer.question}: ${statusText}</h6>
+                    </div>
+                    <p class="mb-3 fw-bold">${question.question}</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <small class="text-muted fw-bold">Your Answer:</small>
+                            <div class="p-3 rounded ${answer.isCorrect ? 'bg-success bg-opacity-10 border border-success' : 'bg-danger bg-opacity-10 border border-danger'}">
+                                ${answer.selected ? `${answer.selected}) ${question.options.find(opt => opt.label === answer.selected)?.text || 'No answer'}` : 'No answer (time expired)'}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted fw-bold">Correct Answer:</small>
+                            <div class="p-3 rounded bg-success bg-opacity-10 border border-success">
+                                ${answer.correct}) ${question.options.find(opt => opt.label === answer.correct)?.text}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted fw-bold">Explanation:</small>
+                        <p class="mb-0 mt-1">${question.explanation}</p>
+                    </div>
+                </div>
+            `;
+        });
+        
+        reviewHTML += `
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('quizContent').innerHTML = reviewHTML;
+        document.getElementById('quizContent').scrollTop = 0;
+    }
+    
+    resetToSetup() {
+        this.currentQuiz = null;
+        this.currentQuestion = 0;
+        this.score = 0;
+        this.userAnswers = [];
+        
+        if (this.timer) {
+            clearInterval(this.timer);
+        }
+        
+        // Reset form
+        document.getElementById('quizSetupForm').reset();
+        
+        // Show setup form
+        document.getElementById('quizSetup').style.display = 'block';
+        document.getElementById('quizContent').innerHTML = document.getElementById('quizSetup').outerHTML;
+        
+        // Re-initialize event listeners for the new form
+        document.getElementById('quizSetupForm').addEventListener('submit', (e) => this.handleQuizSetup(e));
+        document.getElementById('quizSubject').addEventListener('change', () => {
+            document.getElementById('quizTopic').focus();
+        });
+    }
+    
+    showLoading() {
+        if (this.loadingModal) {
+            this.loadingModal.show();
+        }
+    }
+    
+    hideLoading() {
+        if (this.loadingModal) {
+            this.loadingModal.hide();
+        }
+    }
+    
+    showError(message) {
+        alert(message); // Simple error display - you can enhance this
+    }
+}
+
+// Initialize quiz mode when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.quizMode = new QuizMode();
 });
 </script>
 {% endblock %}

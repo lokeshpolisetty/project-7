@@ -31,14 +31,14 @@
             </div>
         </div>
         <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow feature-card">
+            <div class="card h-100 border-0 shadow feature-card quiz-card">
                 <div class="card-body text-center">
                     <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width:70px; height:70px;">
                         <i class="fas fa-question-circle text-warning fs-2"></i>
                     </div>
                     <h5 class="card-title">Interactive Quizzes</h5>
                     <p class="card-text text-muted">Create custom quizzes to test your knowledge and track your progress.</p>
-                    <a href="{{ url_for('chat_quiz') }}" class="btn btn-outline-warning btn-sm mt-2">Try Now</a>
+                    <a href="{{ url_for('chat_quiz') }}" class="btn btn-outline-warning btn-sm mt-2">Start Quiz</a>
                 </div>
             </div>
         </div>
@@ -63,6 +63,26 @@
 .feature-card:hover {
     transform: translateY(-5px) scale(1.03);
     box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.12) !important;
+}
+
+.quiz-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.quiz-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ffc107, #fd7e14);
+}
+
+.quiz-card:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 1rem 2rem rgba(255, 193, 7, 0.2) !important;
 }
 </style>
 {% endblock %}
